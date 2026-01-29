@@ -110,17 +110,9 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
+          # Auto-discover and load all .tfvars files in the environment directory
           terraform plan \
-            -var-file="environments/${{ matrix.environment }}/resource-groups.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/virtual-networks.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/storage-accounts.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/key-vaults.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/app-service-plans.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/app-services.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/sql-servers.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/sql-databases.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/container-registries.tfvars" \
-            -var-file="environments/${{ matrix.environment }}/aks-clusters.tfvars" \
+            $(for f in environments/${{ matrix.environment }}/*.tfvars; do echo "-var-file=$f"; done) \
             -out=tfplan-${{ matrix.environment }} \
             -no-color
         continue-on-error: true
@@ -202,17 +194,9 @@ jobs:
           if [ -f tfplan-${{ matrix.environment }} ]; then
             terraform apply -auto-approve tfplan-${{ matrix.environment }}
           else
+            # Auto-discover and load all .tfvars files in the environment directory
             terraform apply \
-              -var-file="environments/${{ matrix.environment }}/resource-groups.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/virtual-networks.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/storage-accounts.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/key-vaults.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/app-service-plans.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/app-services.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/sql-servers.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/sql-databases.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/container-registries.tfvars" \
-              -var-file="environments/${{ matrix.environment }}/aks-clusters.tfvars" \
+              $(for f in environments/${{ matrix.environment }}/*.tfvars; do echo "-var-file=$f"; done) \
               -auto-approve
           fi
 
@@ -259,15 +243,7 @@ jobs:
 
       - name: Terraform Destroy
         run: |
+          # Auto-discover and load all .tfvars files in the environment directory
           terraform destroy \
-            -var-file="environments/${{ github.event.inputs.environment }}/resource-groups.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/virtual-networks.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/storage-accounts.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/key-vaults.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/app-service-plans.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/app-services.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/sql-servers.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/sql-databases.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/container-registries.tfvars" \
-            -var-file="environments/${{ github.event.inputs.environment }}/aks-clusters.tfvars" \
+            $(for f in environments/${{ github.event.inputs.environment }}/*.tfvars; do echo "-var-file=$f"; done) \
             -auto-approve
