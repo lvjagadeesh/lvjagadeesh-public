@@ -1,13 +1,13 @@
 storage_accounts = {
   "sa1" = {
-    name                     = "examplesa01dev"
-    resource_group_name      = "example-rg-01"
-    location                 = "East US"
-    account_tier             = "Standard"
-    account_replication_type = "LRS"
-    account_kind             = "StorageV2"
-    access_tier              = "Hot"
-    min_tls_version          = "TLS1_2"
+    name                      = "examplesa01dev"
+    resource_group_name       = "example-rg-01"
+    location                  = "East US"
+    account_tier              = "Standard"
+    account_replication_type  = "LRS"
+    account_kind              = "StorageV2"
+    access_tier               = "Hot"
+    min_tls_version           = "TLS1_2"
     enable_https_traffic_only = true
     blob_properties = {
       versioning_enabled = true
@@ -38,7 +38,7 @@ storage_accounts = {
     public_network_access_enabled = false
     shared_access_key_enabled     = false
     blob_properties = {
-      versioning_enabled = true
+      versioning_enabled  = true
       change_feed_enabled = true
       delete_retention_policy = {
         days = 30
@@ -54,15 +54,15 @@ storage_accounts = {
     }
   }
   "sa3" = {
-    name                     = "examplesa03data"
-    resource_group_name      = "example-rg-03"
-    location                 = "Central US"
-    account_tier             = "Standard"
-    account_replication_type = "GRS"
-    account_kind             = "StorageV2"
-    access_tier              = "Hot"
-    is_hns_enabled           = true
-    min_tls_version          = "TLS1_2"
+    name                      = "examplesa03data"
+    resource_group_name       = "example-rg-03"
+    location                  = "Central US"
+    account_tier              = "Standard"
+    account_replication_type  = "GRS"
+    account_kind              = "StorageV2"
+    access_tier               = "Hot"
+    is_hns_enabled            = true
+    min_tls_version           = "TLS1_2"
     enable_https_traffic_only = true
     blob_properties = {
       versioning_enabled = true
@@ -74,7 +74,7 @@ storage_accounts = {
       }
     }
     static_website = {
-      index_document = "index.html"
+      index_document     = "index.html"
       error_404_document = "404.html"
     }
     tags = {
