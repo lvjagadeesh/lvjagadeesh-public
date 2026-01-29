@@ -39,7 +39,7 @@ app_service_name = "prod-app-001"
 # SQL Server
 sql_server_name            = "prod-sqlserver-001"
 sql_administrator_login    = "sqladmin"
-sql_administrator_password = "ChangeMeInProduction123!"
+sql_administrator_password = "REPLACE_WITH_SECURE_PASSWORD" # Use Azure Key Vault or GitHub Secrets
 
 # SQL Database
 sql_database_name = "prod-db"

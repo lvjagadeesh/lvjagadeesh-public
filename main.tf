@@ -7,7 +7,12 @@ terraform {
     }
   }
 
+  # Backend configuration should be provided via:
+  # 1. Backend config file: terraform init -backend-config=backend.hcl
+  # 2. Command line: terraform init -backend-config="key=value"
+  # 3. Environment variables: TF_CLI_ARGS_init="-backend-config=..."
   backend "azurerm" {
+    # These values are placeholders - override during terraform init
     resource_group_name  = "tfstate-rg"
     storage_account_name = "tfstatestore"
     container_name       = "tfstate"

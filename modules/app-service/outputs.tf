@@ -15,5 +15,5 @@ output "default_hostname" {
 
 output "identity_principal_id" {
   description = "The principal ID of the system-assigned identity"
-  value       = azurerm_linux_web_app.this.identity[0].principal_id
+  value       = try(azurerm_linux_web_app.this.identity[0].principal_id, null)
 }

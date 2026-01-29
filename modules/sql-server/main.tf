@@ -8,9 +8,12 @@ resource "azurerm_mssql_server" "this" {
   minimum_tls_version          = var.minimum_tls_version
   tags                         = var.tags
 
-  azuread_administrator {
-    login_username = var.azuread_admin_login
-    object_id      = var.azuread_admin_object_id
+  dynamic "azuread_administrator" {
+    for_each = var.azuread_admin_login != null && var.azuread_admin_object_id != null ? [1] : []
+    content {
+      login_username = var.azuread_admin_login
+      object_id      = var.azuread_admin_object_id
+    }
   }
 }
 

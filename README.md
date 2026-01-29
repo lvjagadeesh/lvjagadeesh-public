@@ -178,6 +178,40 @@ module "virtual_network" {
 - ✅ Soft delete and purge protection enabled
 - ✅ Storage account encryption at rest
 - ✅ SQL Server firewall rules
+- ✅ Passwords not hardcoded in tfvars files
+
+### Handling Sensitive Data
+
+**Never commit sensitive data to version control.** The environment tfvars files contain placeholder values for passwords. Before deploying:
+
+1. **Option 1: Use Environment Variables**
+   ```bash
+   export TF_VAR_sql_administrator_password="YourSecurePassword"
+   terraform apply -var-file="environments/dev/terraform.tfvars"
+   ```
+
+2. **Option 2: Use Azure Key Vault**
+   ```bash
+   # Retrieve password from Key Vault
+   az keyvault secret show --name sql-admin-password --vault-name your-kv --query value -o tsv
+   ```
+
+3. **Option 3: Use GitHub Secrets (for CI/CD)**
+   - Store sensitive values as GitHub secrets
+   - Reference them in the workflow using `${{ secrets.SQL_ADMIN_PASSWORD }}`
+
+4. **Option 4: Use terraform.tfvars (locally, never commit)**
+   ```bash
+   # Create a local tfvars file (this file is ignored by .gitignore)
+   cat > local-secrets.tfvars <<EOF
+   sql_administrator_password = "YourSecurePassword"
+   EOF
+   
+   # Apply with multiple tfvars files
+   terraform apply \
+     -var-file="environments/dev/terraform.tfvars" \
+     -var-file="local-secrets.tfvars"
+   ```
 
 ## 🔧 Customization
 

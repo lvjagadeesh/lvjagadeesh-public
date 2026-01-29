@@ -26,19 +26,20 @@ variable "admin_enabled" {
 }
 
 variable "georeplications" {
-  description = "Geo-replications for the registry"
+  description = "Geo-replications for the registry (requires Premium SKU)"
   type = list(object({
     location                = string
     zone_redundancy_enabled = bool
     tags                    = map(string)
   }))
   default = []
+  # Note: Geo-replication requires Premium SKU
 }
 
 variable "network_rule_default_action" {
   description = "Default action for network rules"
   type        = string
-  default     = "Allow"
+  default     = "Deny"
 }
 
 variable "tags" {
