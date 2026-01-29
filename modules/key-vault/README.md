@@ -206,8 +206,15 @@ Valid values: `Backup`, `Delete`, `DeleteSAS`, `Get`, `GetSAS`, `List`, `ListSAS
 
 ### Access Policy vs RBAC
 - Set `rbac_authorization_enabled = true` to use Azure RBAC instead of access policies
-- When using RBAC, access policies are ignored
+- **IMPORTANT**: When RBAC is enabled, access policies are ignored by Azure Key Vault
+- The module automatically prevents access policy creation when RBAC is enabled
+- Recommended to set `create_default_access_policy = false` when using RBAC
 - RBAC provides more granular control and integrates with Azure IAM
+
+### Tenant ID Configuration
+- The `tenant_id` variable is optional and defaults to the current tenant
+- **WARNING**: When providing a custom `tenant_id`, ensure it matches the tenant of the service principal/user whose `object_id` will be used for access policies
+- Mismatched tenant_id and object_id will cause access policy failures
 
 ### Network Security
 - Default configuration uses `network_acls_default_action = "Deny"` for security

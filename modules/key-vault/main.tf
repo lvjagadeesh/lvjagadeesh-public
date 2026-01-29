@@ -22,9 +22,14 @@ resource "azurerm_key_vault" "this" {
     virtual_network_subnet_ids = var.network_acls_virtual_network_subnet_ids
   }
 
+  # IMPORTANT: When rbac_authorization_enabled is true, access policies are ignored by Azure Key Vault.
+  # Access policies will still be created in Terraform state but will have no effect.
+  # It is recommended to set create_default_access_policy = false and additional_access_policies = []
+  # when using RBAC authorization.
+
   # Default access policy for current user/service principal (optional)
   dynamic "access_policy" {
-    for_each = var.create_default_access_policy ? [1] : []
+    for_each = var.create_default_access_policy && !var.rbac_authorization_enabled ? [1] : []
     content {
       tenant_id               = var.tenant_id != null ? var.tenant_id : data.azurerm_client_config.current.tenant_id
       object_id               = data.azurerm_client_config.current.object_id
@@ -37,7 +42,7 @@ resource "azurerm_key_vault" "this" {
 
   # Additional access policies
   dynamic "access_policy" {
-    for_each = var.additional_access_policies
+    for_each = !var.rbac_authorization_enabled ? var.additional_access_policies : []
     content {
       tenant_id               = access_policy.value.tenant_id
       object_id               = access_policy.value.object_id

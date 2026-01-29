@@ -116,7 +116,7 @@ variable "tags" {
 # ========================================
 
 variable "tenant_id" {
-  description = "(Optional) Azure Active Directory tenant ID for authenticating requests to the Key Vault. If not specified, uses the current tenant ID"
+  description = "(Optional) Azure Active Directory tenant ID for authenticating requests to the Key Vault. If not specified, uses the current tenant ID. WARNING: When providing a custom tenant_id, ensure it matches the tenant of the service principal/user whose object_id will be used for access policies."
   type        = string
   default     = null
 }
@@ -143,7 +143,7 @@ variable "enabled_for_template_deployment" {
 }
 
 variable "rbac_authorization_enabled" {
-  description = "(Optional) If true, the Key Vault will use Role Based Access Control (RBAC) for authorization of data actions. Default: false"
+  description = "(Optional) If true, the Key Vault will use Role Based Access Control (RBAC) for authorization of data actions. Default: false. NOTE: When RBAC is enabled, access policies are ignored by Azure Key Vault."
   type        = bool
   default     = false
   nullable    = false
@@ -167,8 +167,11 @@ variable "network_acls_ip_rules" {
   nullable    = false
 
   validation {
-    condition     = alltrue([for ip in var.network_acls_ip_rules : can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(/[0-9]{1,2})?$", ip))])
-    error_message = "All IP rules must be valid IPv4 addresses or CIDR blocks."
+    condition = alltrue([
+      for ip in var.network_acls_ip_rules :
+      can(regex("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$", ip))
+    ])
+    error_message = "All IP rules must be valid IPv4 addresses (0-255 per octet) or CIDR blocks with prefix length 0-32."
   }
 }
 
@@ -243,6 +246,8 @@ variable "contacts" {
     - email: (Required) Email address of the contact
     - name: (Optional) Name of the contact
     - phone: (Optional) Phone number of the contact
+    
+    Note: Email validation is basic and may not catch all invalid formats. Ensure emails are properly formatted.
   EOT
   type = list(object({
     email = string
@@ -253,7 +258,10 @@ variable "contacts" {
   nullable = false
 
   validation {
-    condition     = alltrue([for contact in var.contacts : can(regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", contact.email))])
-    error_message = "All contact emails must be valid email addresses."
+    condition = alltrue([
+      for contact in var.contacts :
+      can(regex("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", contact.email))
+    ])
+    error_message = "All contact emails must be valid email addresses in standard format (user@domain.com)."
   }
 }
