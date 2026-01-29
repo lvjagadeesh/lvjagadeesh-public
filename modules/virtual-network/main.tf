@@ -4,9 +4,9 @@ locals {
     for vnet_key, vnet in var.virtual_networks : {
       for subnet in try(vnet.subnets, []) :
       "${vnet_key}-${subnet.name}" => {
-        vnet_key             = vnet_key
-        subnet               = subnet
-        resource_group_name  = vnet.resource_group_name
+        vnet_key            = vnet_key
+        subnet              = subnet
+        resource_group_name = vnet.resource_group_name
       }
     }
   ]...)
