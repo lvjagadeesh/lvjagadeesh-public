@@ -1,152 +1,144 @@
-# General Variables
-variable "location" {
-  description = "Azure region for resources"
-  type        = string
-  default     = "East US"
-}
-
-variable "tags" {
-  description = "Common tags to apply to all resources"
+# Common Variables
+variable "common_tags" {
+  description = "(Optional) Common tags to apply to all resources"
   type        = map(string)
   default = {
     ManagedBy = "Terraform"
   }
 }
 
-# Resource Group Variables
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-}
-
-# Virtual Network Variables
-variable "vnet_name" {
-  description = "Name of the virtual network"
-  type        = string
-}
-
-variable "vnet_address_space" {
-  description = "Address space for the virtual network"
-  type        = list(string)
-}
-
-variable "subnets" {
-  description = "List of subnets to create"
-  type = list(object({
-    name             = string
-    address_prefixes = list(string)
+# Resource Group Variables - for_each map
+variable "resource_groups" {
+  description = "(Optional) Map of resource groups to create. Each key is a unique identifier."
+  type = map(object({
+    name     = string           # (Required) Name of the resource group
+    location = string           # (Required) Azure region
+    tags     = optional(map(string)) # (Optional) Additional tags
   }))
-  default = []
+  default = {}
 }
 
-# Storage Account Variables
-variable "storage_account_name" {
-  description = "Name of the storage account"
-  type        = string
+# Virtual Network Variables - for_each map
+variable "virtual_networks" {
+  description = "(Optional) Map of virtual networks to create. Each key is a unique identifier."
+  type = map(object({
+    name                = string           # (Required) Name of the virtual network
+    address_space       = list(string)     # (Required) Address space
+    location            = string           # (Required) Azure region
+    resource_group_name = string           # (Required) Resource group name
+    subnets = optional(list(object({      # (Optional) List of subnets
+      name             = string
+      address_prefixes = list(string)
+    })), [])
+    tags = optional(map(string)) # (Optional) Additional tags
+  }))
+  default = {}
 }
 
-variable "storage_account_tier" {
-  description = "Storage account tier"
-  type        = string
-  default     = "Standard"
+# Storage Account Variables - for_each map
+variable "storage_accounts" {
+  description = "(Optional) Map of storage accounts to create. Each key is a unique identifier."
+  type = map(object({
+    name                     = string           # (Required) Storage account name
+    resource_group_name      = string           # (Required) Resource group name
+    location                 = string           # (Required) Azure region
+    account_tier             = optional(string) # (Optional) Account tier, default: Standard
+    account_replication_type = optional(string) # (Optional) Replication type, default: LRS
+    tags                     = optional(map(string)) # (Optional) Additional tags
+  }))
+  default = {}
 }
 
-variable "storage_account_replication_type" {
-  description = "Storage account replication type"
-  type        = string
-  default     = "LRS"
+# Key Vault Variables - for_each map
+variable "key_vaults" {
+  description = "(Optional) Map of key vaults to create. Each key is a unique identifier."
+  type = map(object({
+    name                = string           # (Required) Key Vault name
+    location            = string           # (Required) Azure region
+    resource_group_name = string           # (Required) Resource group name
+    tags                = optional(map(string)) # (Optional) Additional tags
+  }))
+  default = {}
 }
 
-# Key Vault Variables
-variable "key_vault_name" {
-  description = "Name of the Key Vault"
-  type        = string
+# App Service Plan Variables - for_each map
+variable "app_service_plans" {
+  description = "(Optional) Map of app service plans to create. Each key is a unique identifier."
+  type = map(object({
+    name                = string           # (Required) App Service Plan name
+    location            = string           # (Required) Azure region
+    resource_group_name = string           # (Required) Resource group name
+    os_type             = optional(string) # (Optional) OS type, default: Linux
+    sku_name            = optional(string) # (Optional) SKU name, default: P1v2
+    tags                = optional(map(string)) # (Optional) Additional tags
+  }))
+  default = {}
 }
 
-# App Service Plan Variables
-variable "app_service_plan_name" {
-  description = "Name of the App Service Plan"
-  type        = string
+# App Service Variables - for_each map
+variable "app_services" {
+  description = "(Optional) Map of app services to create. Each key is a unique identifier."
+  type = map(object({
+    name                = string           # (Required) App Service name
+    location            = string           # (Required) Azure region
+    resource_group_name = string           # (Required) Resource group name
+    service_plan_id     = string           # (Required) Service Plan ID
+    tags                = optional(map(string)) # (Optional) Additional tags
+  }))
+  default = {}
 }
 
-variable "app_service_plan_os_type" {
-  description = "OS type for App Service Plan"
-  type        = string
-  default     = "Linux"
+# SQL Server Variables - for_each map
+variable "sql_servers" {
+  description = "(Optional) Map of SQL servers to create. Each key is a unique identifier."
+  type = map(object({
+    name                         = string           # (Required) SQL Server name
+    resource_group_name          = string           # (Required) Resource group name
+    location                     = string           # (Required) Azure region
+    administrator_login          = string           # (Required) Admin login
+    administrator_login_password = string           # (Required) Admin password
+    tags                         = optional(map(string)) # (Optional) Additional tags
+  }))
+  default   = {}
+  sensitive = true
 }
 
-variable "app_service_plan_sku_name" {
-  description = "SKU name for App Service Plan"
-  type        = string
-  default     = "P1v2"
+# SQL Database Variables - for_each map
+variable "sql_databases" {
+  description = "(Optional) Map of SQL databases to create. Each key is a unique identifier."
+  type = map(object({
+    name          = string           # (Required) Database name
+    sql_server_id = string           # (Required) SQL Server ID
+    tags          = optional(map(string)) # (Optional) Additional tags
+  }))
+  default = {}
 }
 
-# App Service Variables
-variable "app_service_name" {
-  description = "Name of the App Service"
-  type        = string
+# Container Registry Variables - for_each map
+variable "container_registries" {
+  description = "(Optional) Map of container registries to create. Each key is a unique identifier."
+  type = map(object({
+    name                = string           # (Required) Container Registry name
+    resource_group_name = string           # (Required) Resource group name
+    location            = string           # (Required) Azure region
+    sku                 = optional(string) # (Optional) SKU, default: Standard
+    tags                = optional(map(string)) # (Optional) Additional tags
+  }))
+  default = {}
 }
 
-# SQL Server Variables
-variable "sql_server_name" {
-  description = "Name of the SQL Server"
-  type        = string
-}
-
-variable "sql_administrator_login" {
-  description = "SQL Server administrator login"
-  type        = string
-}
-
-variable "sql_administrator_password" {
-  description = "SQL Server administrator password"
-  type        = string
-  sensitive   = true
-}
-
-# SQL Database Variables
-variable "sql_database_name" {
-  description = "Name of the SQL Database"
-  type        = string
-}
-
-# Container Registry Variables
-variable "container_registry_name" {
-  description = "Name of the Container Registry"
-  type        = string
-}
-
-variable "container_registry_sku" {
-  description = "SKU for the Container Registry"
-  type        = string
-  default     = "Standard"
-}
-
-# AKS Cluster Variables
-variable "aks_cluster_name" {
-  description = "Name of the AKS cluster"
-  type        = string
-}
-
-variable "aks_dns_prefix" {
-  description = "DNS prefix for the AKS cluster"
-  type        = string
-}
-
-variable "aks_kubernetes_version" {
-  description = "Kubernetes version"
-  type        = string
-  default     = "1.27.0"
-}
-
-variable "aks_node_pool_vm_size" {
-  description = "VM size for AKS node pool"
-  type        = string
-  default     = "Standard_D2_v2"
-}
-
-variable "aks_node_pool_count" {
-  description = "Number of nodes in AKS node pool"
-  type        = number
-  default     = 3
+# AKS Cluster Variables - for_each map
+variable "aks_clusters" {
+  description = "(Optional) Map of AKS clusters to create. Each key is a unique identifier."
+  type = map(object({
+    name                      = string           # (Required) AKS cluster name
+    location                  = string           # (Required) Azure region
+    resource_group_name       = string           # (Required) Resource group name
+    dns_prefix                = string           # (Required) DNS prefix
+    kubernetes_version        = optional(string) # (Optional) K8s version, default: 1.27.0
+    default_node_pool_vm_size = optional(string) # (Optional) VM size, default: Standard_D2_v2
+    default_node_pool_count   = optional(number) # (Optional) Node count, default: 3
+    tags                      = optional(map(string)) # (Optional) Additional tags
+  }))
+  default = {}
 }
