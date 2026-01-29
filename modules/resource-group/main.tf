@@ -1,6 +1,8 @@
 resource "azurerm_resource_group" "this" {
-  name       = var.resource_group_name
-  location   = var.location
-  managed_by = var.managed_by
-  tags       = var.tags
+  for_each = var.resource_groups
+
+  name       = each.value.name
+  location   = each.value.location
+  managed_by = each.value.managed_by
+  tags       = each.value.tags != null ? each.value.tags : {}
 }
