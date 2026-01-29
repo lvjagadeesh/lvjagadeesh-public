@@ -1,41 +1,96 @@
-# Required variables
-app_service_plan_name = "example-asp"
-location              = "East US"
-resource_group_name   = "example-rg"
+# App Service Plans Configuration
+# Create multiple App Service Plans with different configurations
 
-# OS type - Valid values: Linux, Windows, WindowsContainer
-os_type = "Linux"
+app_service_plans = {
+  # Linux App Service Plan for Web Apps
+  "web-linux-plan" = {
+    name                = "example-web-linux-asp"
+    location            = "East US"
+    resource_group_name = "example-rg"
+    os_type             = "Linux"
+    sku_name            = "P1v2"
 
-# SKU name - Examples: B1, B2, B3, S1, S2, S3, P1v2, P2v2, P3v2, P1v3, P2v3, P3v3
-sku_name = "P1v2"
+    # Enable zone balancing for high availability
+    zone_balancing_enabled = true
 
-# Optional: App Service Environment ID (required for Isolated SKUs)
-# app_service_environment_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Web/hostingEnvironments/example-ase"
+    # Optional: Enable per-site scaling
+    per_site_scaling_enabled = false
 
-# Optional: Maximum number of elastic workers (for Elastic SKUs only)
-# maximum_elastic_worker_count = 20
+    tags = {
+      Environment = "Development"
+      ManagedBy   = "Terraform"
+      Project     = "WebApp"
+      Purpose     = "Linux Web Application"
+    }
+  }
 
-# Optional: Number of workers (instances) - typically 1-30
-# worker_count = 3
+  # Windows App Service Plan for .NET Apps
+  "dotnet-windows-plan" = {
+    name                = "example-dotnet-windows-asp"
+    location            = "East US"
+    resource_group_name = "example-rg"
+    os_type             = "Windows"
+    sku_name            = "P2v3"
 
-# Optional: Enable per-site scaling (default: false)
-per_site_scaling_enabled = false
+    # Higher worker count for production workload
+    worker_count = 3
 
-# Optional: Enable zone balancing across availability zones (default: false)
-# Note: Changing this forces a new resource to be created
-zone_balancing_enabled = false
+    # Enable per-site scaling for better resource utilization
+    per_site_scaling_enabled = true
 
-# Optional: Tags
-tags = {
-  Environment = "Development"
-  ManagedBy   = "Terraform"
-  Project     = "Example"
+    tags = {
+      Environment = "Production"
+      ManagedBy   = "Terraform"
+      Project     = "DotNetApp"
+      Purpose     = "Windows .NET Application"
+    }
+  }
+
+  # Premium Linux Plan with Elastic Premium SKU
+  "api-elastic-plan" = {
+    name                = "example-api-elastic-asp"
+    location            = "West US"
+    resource_group_name = "example-rg"
+    os_type             = "Linux"
+    sku_name            = "EP1"
+
+    # Configure elastic scaling for Functions or API Apps
+    maximum_elastic_worker_count = 20
+
+    # Enable zone balancing for high availability
+    zone_balancing_enabled = true
+
+    tags = {
+      Environment = "Staging"
+      ManagedBy   = "Terraform"
+      Project     = "APIService"
+      Purpose     = "Elastic Premium for APIs"
+    }
+
+    # Optional: Custom timeouts
+    timeouts = {
+      create = "90m"
+      read   = "5m"
+      update = "90m"
+      delete = "90m"
+    }
+  }
 }
 
-# Optional: Custom timeouts
-# timeouts = {
-#   create = "60m"
-#   read   = "5m"
-#   update = "60m"
-#   delete = "60m"
+# Example with App Service Environment (commented out as ASE is not commonly available)
+# app_service_plans = {
+#   "isolated-plan" = {
+#     name                       = "example-isolated-asp"
+#     location                   = "East US"
+#     resource_group_name        = "example-rg"
+#     os_type                    = "Linux"
+#     sku_name                   = "I1v2"
+#     app_service_environment_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Web/hostingEnvironments/example-ase"
+#
+#     tags = {
+#       Environment = "Production"
+#       ManagedBy   = "Terraform"
+#       Security    = "Isolated"
+#     }
+#   }
 # }

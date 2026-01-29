@@ -65,12 +65,23 @@ variable "key_vaults" {
 variable "app_service_plans" {
   description = "(Optional) Map of app service plans to create. Each key is a unique identifier."
   type = map(object({
-    name                = string                # (Required) App Service Plan name
-    location            = string                # (Required) Azure region
-    resource_group_name = string                # (Required) Resource group name
-    os_type             = optional(string)      # (Optional) OS type, default: Linux
-    sku_name            = optional(string)      # (Optional) SKU name, default: P1v2
-    tags                = optional(map(string)) # (Optional) Additional tags
+    name                         = string                # (Required) App Service Plan name
+    location                     = string                # (Required) Azure region
+    resource_group_name          = string                # (Required) Resource group name
+    os_type                      = optional(string)      # (Optional) OS type, default: Linux
+    sku_name                     = optional(string)      # (Optional) SKU name, default: P1v2
+    app_service_environment_id   = optional(string)      # (Optional) App Service Environment ID
+    maximum_elastic_worker_count = optional(number)      # (Optional) Max elastic workers
+    worker_count                 = optional(number)      # (Optional) Number of workers
+    per_site_scaling_enabled     = optional(bool)        # (Optional) Per-site scaling
+    zone_balancing_enabled       = optional(bool)        # (Optional) Zone balancing
+    tags                         = optional(map(string)) # (Optional) Additional tags
+    timeouts = optional(object({
+      create = optional(string)
+      read   = optional(string)
+      update = optional(string)
+      delete = optional(string)
+    }))
   }))
   default = {}
 }

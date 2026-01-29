@@ -80,15 +80,9 @@ module "key_vault" {
 
 # App Service Plan Module - Independent
 module "app_service_plan" {
-  source   = "./modules/app-service-plan"
-  for_each = var.app_service_plans
+  source = "./modules/app-service-plan"
 
-  app_service_plan_name = each.value.name
-  location              = each.value.location
-  resource_group_name   = each.value.resource_group_name
-  os_type               = lookup(each.value, "os_type", "Linux")
-  sku_name              = lookup(each.value, "sku_name", "P1v2")
-  tags                  = merge(var.common_tags, lookup(each.value, "tags", {}))
+  app_service_plans = var.app_service_plans
 }
 
 # App Service Module - Independent, requires service_plan_id as input
