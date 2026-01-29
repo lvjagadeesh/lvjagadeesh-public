@@ -27,16 +27,16 @@ storage_accounts = {
     }
   }
   "sa2" = {
-    name                     = "examplesa02prod"
-    resource_group_name      = "example-rg-02"
-    location                 = "West US"
-    account_tier             = "Premium"
-    account_replication_type = "ZRS"
-    account_kind             = "BlockBlobStorage"
-    enable_https_traffic_only = true
-    min_tls_version          = "TLS1_3"
+    name                          = "examplesa02prod"
+    resource_group_name           = "example-rg-02"
+    location                      = "West US"
+    account_tier                  = "Premium"
+    account_replication_type      = "ZRS"
+    account_kind                  = "BlockBlobStorage"
+    enable_https_traffic_only     = true
+    min_tls_version               = "TLS1_3"
     public_network_access_enabled = false
-    shared_access_key_enabled = false
+    shared_access_key_enabled     = false
     blob_properties = {
       versioning_enabled = true
       change_feed_enabled = true

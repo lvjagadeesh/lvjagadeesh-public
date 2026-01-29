@@ -202,6 +202,6 @@ variable "storage_accounts" {
 
   validation {
     condition     = alltrue([for sa in var.storage_accounts : sa.identity == null || contains(["SystemAssigned", "UserAssigned", "SystemAssigned, UserAssigned"], sa.identity.type)])
-    error_message = "All storage account identity types must be one of: SystemAssigned, UserAssigned, SystemAssigned, UserAssigned."
+    error_message = "All storage account identity types must be one of: SystemAssigned, UserAssigned, or 'SystemAssigned, UserAssigned' (with comma and space)."
   }
 }

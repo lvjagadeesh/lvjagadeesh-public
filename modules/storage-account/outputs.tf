@@ -1,16 +1,14 @@
 output "storage_accounts" {
-  description = "Map of all storage accounts created"
+  description = "Map of all storage accounts created (excluding sensitive data)"
   value = {
     for k, sa in azurerm_storage_account.this : k => {
       id                    = sa.id
       name                  = sa.name
       primary_blob_endpoint = sa.primary_blob_endpoint
-      primary_access_key    = sa.primary_access_key
       resource_group_name   = sa.resource_group_name
       location              = sa.location
     }
   }
-  sensitive = true
 }
 
 output "storage_account_ids" {
