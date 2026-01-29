@@ -2,6 +2,26 @@
 
 Production-ready Azure Terraform infrastructure with fully independent modules, for_each pattern support, and latest provider versions.
 
+## 📦 Quick Module Reference
+
+**10 Production-Ready Modules Available**:
+
+| Module | Purpose | Documentation |
+|--------|---------|---------------|
+| `resource-group` | Resource Group | [Details](MODULE-REFERENCE.md#1-resource-group) |
+| `virtual-network` | Virtual Network + Subnets | [Details](MODULE-REFERENCE.md#2-virtual-network) |
+| `storage-account` | Storage Account (Enhanced) | [Details](MODULE-REFERENCE.md#3-storage-account) |
+| `key-vault` | Key Vault | [Details](MODULE-REFERENCE.md#4-key-vault) |
+| `app-service-plan` | App Service Plan | [Details](MODULE-REFERENCE.md#5-app-service-plan) |
+| `app-service` | Linux Web App | [Details](MODULE-REFERENCE.md#6-app-service) |
+| `sql-server` | SQL Server | [Details](MODULE-REFERENCE.md#7-sql-server) |
+| `sql-database` | SQL Database | [Details](MODULE-REFERENCE.md#8-sql-database) |
+| `container-registry` | Container Registry | [Details](MODULE-REFERENCE.md#9-container-registry) |
+| `aks-cluster` | Kubernetes Cluster | [Details](MODULE-REFERENCE.md#10-aks-cluster) |
+
+📖 **See [MODULE-REFERENCE.md](MODULE-REFERENCE.md) for complete details** on each module including features, usage examples, and configurations.  
+📝 **See [MODULES.md](MODULES.md) for a quick reference list**.
+
 ## 📋 Overview
 
 This repository contains **10 independent Azure Terraform modules** that can be used individually or together. Each module is designed as a standalone layer with no dependencies on other modules, making them perfect for reuse across different projects.
