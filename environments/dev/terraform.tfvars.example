@@ -1,0 +1,115 @@
+# Development Environment Configuration with for_each pattern
+# This example shows how to create multiple resources of each type
+# Each module is now independent and can be used without others
+
+# Common tags applied to all resources
+common_tags = {
+  Environment = "Development"
+  ManagedBy   = "Terraform"
+  Project     = "Azure Infrastructure"
+  CostCenter  = "Engineering"
+}
+
+# Resource Groups - Multiple can be created
+resource_groups = {
+  "primary" = {
+    name     = "dev-rg-primary"
+    location = "East US"
+    tags = {
+      Purpose = "Primary resources"
+    }
+  }
+}
+
+# Virtual Networks - Independent, no dependency on other modules
+virtual_networks = {
+  "vnet1" = {
+    name                = "dev-vnet-1"
+    address_space       = ["10.0.0.0/16"]
+    location            = "East US"
+    resource_group_name = "dev-rg-primary" # Reference RG name directly
+    subnets = [
+      {
+        name             = "dev-subnet-1"
+        address_prefixes = ["10.0.1.0/24"]
+      },
+      {
+        name             = "dev-subnet-2"
+        address_prefixes = ["10.0.2.0/24"]
+      }
+    ]
+  }
+}
+
+# Storage Accounts - Independent
+storage_accounts = {
+  "storage1" = {
+    name                     = "devstorageacct001"
+    resource_group_name      = "dev-rg-primary"
+    location                 = "East US"
+    account_tier             = "Standard"
+    account_replication_type = "LRS"
+  }
+}
+
+# Key Vaults - Independent
+key_vaults = {
+  "kv1" = {
+    name                = "dev-kv-001"
+    location            = "East US"
+    resource_group_name = "dev-rg-primary"
+  }
+}
+
+# App Service Plans - Independent
+app_service_plans = {
+  "asp1" = {
+    name                = "dev-asp"
+    location            = "East US"
+    resource_group_name = "dev-rg-primary"
+    os_type             = "Linux"
+    sku_name            = "B1"
+  }
+}
+
+# App Services - Independent, requires service_plan_id as input
+# Note: You can reference outputs or use resource IDs directly
+app_services = {}
+
+# SQL Servers - Independent
+sql_servers = {
+  "sql1" = {
+    name                         = "dev-sqlserver-001"
+    resource_group_name          = "dev-rg-primary"
+    location                     = "East US"
+    administrator_login          = "sqladmin"
+    administrator_login_password = "REPLACE_WITH_SECURE_PASSWORD" # Use Azure Key Vault or GitHub Secrets
+  }
+}
+
+# SQL Databases - Independent, requires sql_server_id
+# Note: You can reference outputs or use resource IDs directly
+sql_databases = {}
+
+# Container Registries - Independent
+container_registries = {
+  "acr1" = {
+    name                = "devacr001"
+    resource_group_name = "dev-rg-primary"
+    location            = "East US"
+    sku                 = "Basic"
+  }
+}
+
+# AKS Clusters - Independent
+aks_clusters = {
+  "aks1" = {
+    name                      = "dev-aks"
+    location                  = "East US"
+    resource_group_name       = "dev-rg-primary"
+    dns_prefix                = "dev-aks"
+    kubernetes_version        = "1.27.0"
+    default_node_pool_vm_size = "Standard_B2s"
+    default_node_pool_count   = 1
+  }
+}
