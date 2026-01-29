@@ -1,90 +1,92 @@
 resource "azurerm_linux_web_app" "this" {
+  for_each = var.app_services
+
   # Required arguments
-  name                = var.app_service_name
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  service_plan_id     = var.service_plan_id
+  name                = each.value.name
+  location            = each.value.location
+  resource_group_name = each.value.resource_group_name
+  service_plan_id     = each.value.service_plan_id
 
   # Core optional arguments
-  enabled                                        = var.enabled
-  app_settings                                   = var.app_settings
-  tags                                           = var.tags
-  public_network_access_enabled                  = var.public_network_access_enabled
-  client_affinity_enabled                        = var.client_affinity_enabled
-  client_certificate_enabled                     = var.client_certificate_enabled
-  client_certificate_mode                        = var.client_certificate_mode
-  client_certificate_exclusion_paths             = var.client_certificate_exclusion_paths
-  https_only                                     = var.https_only
-  virtual_network_subnet_id                      = var.virtual_network_subnet_id
-  key_vault_reference_identity_id                = var.key_vault_reference_identity_id
-  zip_deploy_file                                = var.zip_deploy_file
-  webdeploy_publish_basic_authentication_enabled = var.webdeploy_publish_basic_authentication_enabled
-  ftp_publish_basic_authentication_enabled       = var.ftp_publish_basic_authentication_enabled
+  enabled                                        = each.value.enabled
+  app_settings                                   = each.value.app_settings
+  tags                                           = each.value.tags
+  public_network_access_enabled                  = each.value.public_network_access_enabled
+  client_affinity_enabled                        = each.value.client_affinity_enabled
+  client_certificate_enabled                     = each.value.client_certificate_enabled
+  client_certificate_mode                        = each.value.client_certificate_mode
+  client_certificate_exclusion_paths             = each.value.client_certificate_exclusion_paths
+  https_only                                     = each.value.https_only
+  virtual_network_subnet_id                      = each.value.virtual_network_subnet_id
+  key_vault_reference_identity_id                = each.value.key_vault_reference_identity_id
+  zip_deploy_file                                = each.value.zip_deploy_file
+  webdeploy_publish_basic_authentication_enabled = each.value.webdeploy_publish_basic_authentication_enabled
+  ftp_publish_basic_authentication_enabled       = each.value.ftp_publish_basic_authentication_enabled
 
   # ========================================
   # SITE_CONFIG BLOCK
   # ========================================
   site_config {
     # Core site_config attributes
-    always_on                                     = var.always_on
-    api_definition_url                            = var.api_definition_url
-    api_management_api_id                         = var.api_management_api_id
-    app_command_line                              = var.app_command_line
-    container_registry_use_managed_identity       = var.container_registry_use_managed_identity
-    container_registry_managed_identity_client_id = var.container_registry_managed_identity_client_id
-    default_documents                             = var.default_documents
-    ftps_state                                    = var.ftps_state
-    health_check_path                             = var.health_check_path
-    health_check_eviction_time_in_min             = var.health_check_eviction_time_in_min
-    http2_enabled                                 = var.http2_enabled
-    ip_restriction_default_action                 = var.ip_restriction_default_action
-    load_balancing_mode                           = var.load_balancing_mode
-    local_mysql_enabled                           = var.local_mysql_enabled
-    managed_pipeline_mode                         = var.managed_pipeline_mode
-    minimum_tls_version                           = var.minimum_tls_version
-    remote_debugging_enabled                      = var.remote_debugging_enabled
-    remote_debugging_version                      = var.remote_debugging_version
-    scm_ip_restriction_default_action             = var.scm_ip_restriction_default_action
-    scm_minimum_tls_version                       = var.scm_minimum_tls_version
-    scm_use_main_ip_restriction                   = var.scm_use_main_ip_restriction
-    use_32_bit_worker                             = var.use_32_bit_worker
-    vnet_route_all_enabled                        = var.vnet_route_all_enabled
-    websockets_enabled                            = var.websockets_enabled
-    worker_count                                  = var.worker_count
+    always_on                                     = each.value.always_on
+    api_definition_url                            = each.value.api_definition_url
+    api_management_api_id                         = each.value.api_management_api_id
+    app_command_line                              = each.value.app_command_line
+    container_registry_use_managed_identity       = each.value.container_registry_use_managed_identity
+    container_registry_managed_identity_client_id = each.value.container_registry_managed_identity_client_id
+    default_documents                             = each.value.default_documents
+    ftps_state                                    = each.value.ftps_state
+    health_check_path                             = each.value.health_check_path
+    health_check_eviction_time_in_min             = each.value.health_check_eviction_time_in_min
+    http2_enabled                                 = each.value.http2_enabled
+    ip_restriction_default_action                 = each.value.ip_restriction_default_action
+    load_balancing_mode                           = each.value.load_balancing_mode
+    local_mysql_enabled                           = each.value.local_mysql_enabled
+    managed_pipeline_mode                         = each.value.managed_pipeline_mode
+    minimum_tls_version                           = each.value.minimum_tls_version
+    remote_debugging_enabled                      = each.value.remote_debugging_enabled
+    remote_debugging_version                      = each.value.remote_debugging_version
+    scm_ip_restriction_default_action             = each.value.scm_ip_restriction_default_action
+    scm_minimum_tls_version                       = each.value.scm_minimum_tls_version
+    scm_use_main_ip_restriction                   = each.value.scm_use_main_ip_restriction
+    use_32_bit_worker                             = each.value.use_32_bit_worker
+    vnet_route_all_enabled                        = each.value.vnet_route_all_enabled
+    websockets_enabled                            = each.value.websockets_enabled
+    worker_count                                  = each.value.worker_count
 
     # Application stack configuration
     dynamic "application_stack" {
       for_each = (
-        var.docker_image_name != null ||
-        var.dotnet_version != null ||
-        var.go_version != null ||
-        var.java_version != null ||
-        var.node_version != null ||
-        var.php_version != null ||
-        var.python_version != null ||
-        var.ruby_version != null
+        each.value.docker_image_name != null ||
+        each.value.dotnet_version != null ||
+        each.value.go_version != null ||
+        each.value.java_version != null ||
+        each.value.node_version != null ||
+        each.value.php_version != null ||
+        each.value.python_version != null ||
+        each.value.ruby_version != null
       ) ? [1] : []
 
       content {
-        docker_image_name        = var.docker_image_name
-        docker_registry_url      = var.docker_image_name != null ? var.docker_registry_url : null
-        docker_registry_username = var.docker_registry_username
-        docker_registry_password = var.docker_registry_password
-        dotnet_version           = var.dotnet_version
-        go_version               = var.go_version
-        java_server              = var.java_server
-        java_server_version      = var.java_server_version
-        java_version             = var.java_version
-        node_version             = var.node_version
-        php_version              = var.php_version
-        python_version           = var.python_version
-        ruby_version             = var.ruby_version
+        docker_image_name        = each.value.docker_image_name
+        docker_registry_url      = each.value.docker_image_name != null ? each.value.docker_registry_url : null
+        docker_registry_username = each.value.docker_registry_username
+        docker_registry_password = each.value.docker_registry_password
+        dotnet_version           = each.value.dotnet_version
+        go_version               = each.value.go_version
+        java_server              = each.value.java_server
+        java_server_version      = each.value.java_server_version
+        java_version             = each.value.java_version
+        node_version             = each.value.node_version
+        php_version              = each.value.php_version
+        python_version           = each.value.python_version
+        ruby_version             = each.value.ruby_version
       }
     }
 
     # Auto-heal settings
     dynamic "auto_heal_setting" {
-      for_each = var.auto_heal_setting != null ? [var.auto_heal_setting] : []
+      for_each = each.value.auto_heal_setting != null ? [each.value.auto_heal_setting] : []
 
       content {
         action {
@@ -141,17 +143,17 @@ resource "azurerm_linux_web_app" "this" {
 
     # CORS configuration
     dynamic "cors" {
-      for_each = length(var.cors_allowed_origins) > 0 ? [1] : []
+      for_each = length(each.value.cors_allowed_origins) > 0 ? [1] : []
 
       content {
-        allowed_origins     = var.cors_allowed_origins
-        support_credentials = var.cors_support_credentials
+        allowed_origins     = each.value.cors_allowed_origins
+        support_credentials = each.value.cors_support_credentials
       }
     }
 
     # IP restrictions
     dynamic "ip_restriction" {
-      for_each = var.ip_restriction
+      for_each = each.value.ip_restriction
 
       content {
         action                    = ip_restriction.value.action
@@ -176,7 +178,7 @@ resource "azurerm_linux_web_app" "this" {
 
     # SCM IP restrictions
     dynamic "scm_ip_restriction" {
-      for_each = var.scm_ip_restriction
+      for_each = each.value.scm_ip_restriction
 
       content {
         action                    = scm_ip_restriction.value.action
@@ -204,7 +206,7 @@ resource "azurerm_linux_web_app" "this" {
   # AUTH_SETTINGS BLOCK
   # ========================================
   dynamic "auth_settings" {
-    for_each = var.auth_settings != null ? [var.auth_settings] : []
+    for_each = each.value.auth_settings != null ? [each.value.auth_settings] : []
 
     content {
       enabled                        = auth_settings.value.enabled
@@ -288,7 +290,7 @@ resource "azurerm_linux_web_app" "this" {
   # AUTH_SETTINGS_V2 BLOCK
   # ========================================
   dynamic "auth_settings_v2" {
-    for_each = var.auth_settings_v2 != null ? [var.auth_settings_v2] : []
+    for_each = each.value.auth_settings_v2 != null ? [each.value.auth_settings_v2] : []
 
     content {
       auth_enabled                            = auth_settings_v2.value.auth_enabled
@@ -435,7 +437,7 @@ resource "azurerm_linux_web_app" "this" {
   # BACKUP BLOCK
   # ========================================
   dynamic "backup" {
-    for_each = var.backup != null ? [var.backup] : []
+    for_each = each.value.backup != null ? [each.value.backup] : []
 
     content {
       name                = backup.value.name
@@ -456,7 +458,7 @@ resource "azurerm_linux_web_app" "this" {
   # CONNECTION_STRING BLOCK
   # ========================================
   dynamic "connection_string" {
-    for_each = var.connection_strings
+    for_each = each.value.connection_strings
 
     content {
       name  = connection_string.value.name
@@ -469,7 +471,7 @@ resource "azurerm_linux_web_app" "this" {
   # STORAGE_ACCOUNT BLOCK
   # ========================================
   dynamic "storage_account" {
-    for_each = var.storage_accounts
+    for_each = each.value.storage_accounts
 
     content {
       name         = storage_account.value.name
@@ -485,7 +487,7 @@ resource "azurerm_linux_web_app" "this" {
   # LOGS BLOCK
   # ========================================
   dynamic "logs" {
-    for_each = var.logs != null ? [var.logs] : []
+    for_each = each.value.logs != null ? [each.value.logs] : []
 
     content {
       detailed_error_messages = logs.value.detailed_error_messages
@@ -539,15 +541,15 @@ resource "azurerm_linux_web_app" "this" {
   # IDENTITY BLOCK
   # ========================================
   identity {
-    type         = var.identity_type
-    identity_ids = var.identity_type != "SystemAssigned" ? var.identity_ids : null
+    type         = each.value.identity_type
+    identity_ids = each.value.identity_type != "SystemAssigned" ? each.value.identity_ids : null
   }
 
   # ========================================
   # STICKY_SETTINGS BLOCK
   # ========================================
   dynamic "sticky_settings" {
-    for_each = var.sticky_settings != null ? [var.sticky_settings] : []
+    for_each = each.value.sticky_settings != null ? [each.value.sticky_settings] : []
 
     content {
       app_setting_names       = sticky_settings.value.app_setting_names
