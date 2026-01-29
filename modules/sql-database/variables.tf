@@ -1,76 +1,38 @@
-variable "database_name" {
-  description = "(Required) Name of the SQL Database. Must be unique within the server"
-  type        = string
+variable "sql_databases" {
+  description = "(Required) Map of SQL databases to create. Each key is a unique identifier and value contains the database configuration"
+  type = map(object({
+    name           = string                                           # (Required) Name of the SQL Database. Must be unique within the server
+    server_id      = string                                           # (Required) Resource ID of the SQL Server where the database will be created
+    collation      = optional(string, "SQL_Latin1_General_CP1_CI_AS") # (Optional) Database collation
+    license_type   = optional(string, "LicenseIncluded")              # (Optional) License type. Valid values: LicenseIncluded, BasePrice
+    max_size_gb    = optional(number, 2)                              # (Optional) Maximum size of the database in GB
+    sku_name       = optional(string, "S0")                           # (Optional) SKU name for the database (e.g., S0, S1, P1, GP_Gen5_2)
+    zone_redundant = optional(bool, false)                            # (Optional) Enable zone redundancy for high availability
+    tags           = optional(map(string), {})                        # (Optional) Tags to apply to the SQL Database
+  }))
 
   validation {
-    condition     = length(var.database_name) > 0 && length(var.database_name) <= 128
-    error_message = "Database name must be between 1 and 128 characters."
+    condition     = alltrue([for db in var.sql_databases : length(db.name) > 0 && length(db.name) <= 128])
+    error_message = "All database names must be between 1 and 128 characters."
   }
-}
-
-variable "sql_server_id" {
-  description = "(Required) Resource ID of the SQL Server where the database will be created"
-  type        = string
 
   validation {
-    condition     = length(var.sql_server_id) > 0
-    error_message = "SQL Server ID must be specified."
+    condition     = alltrue([for db in var.sql_databases : length(db.server_id) > 0])
+    error_message = "All databases must have a SQL Server ID specified."
   }
-}
-
-variable "collation" {
-  description = "(Optional) Database collation. Default: SQL_Latin1_General_CP1_CI_AS"
-  type        = string
-  default     = "SQL_Latin1_General_CP1_CI_AS"
-  nullable    = false
-}
-
-variable "license_type" {
-  description = "(Optional) License type. Valid values: LicenseIncluded, BasePrice. Default: LicenseIncluded"
-  type        = string
-  default     = "LicenseIncluded"
-  nullable    = false
 
   validation {
-    condition     = contains(["LicenseIncluded", "BasePrice"], var.license_type)
-    error_message = "License type must be either LicenseIncluded or BasePrice."
+    condition     = alltrue([for db in var.sql_databases : contains(["LicenseIncluded", "BasePrice"], db.license_type)])
+    error_message = "All database license types must be either LicenseIncluded or BasePrice."
   }
-}
-
-variable "max_size_gb" {
-  description = "(Optional) Maximum size of the database in GB. Default: 2"
-  type        = number
-  default     = 2
-  nullable    = false
 
   validation {
-    condition     = var.max_size_gb > 0
-    error_message = "Maximum size must be greater than 0 GB."
+    condition     = alltrue([for db in var.sql_databases : db.max_size_gb > 0])
+    error_message = "All database maximum sizes must be greater than 0 GB."
   }
-}
-
-variable "sku_name" {
-  description = "(Optional) SKU name for the database (e.g., S0, S1, P1, GP_Gen5_2). Default: S0"
-  type        = string
-  default     = "S0"
-  nullable    = false
 
   validation {
-    condition     = length(var.sku_name) > 0
-    error_message = "SKU name must be specified."
+    condition     = alltrue([for db in var.sql_databases : length(db.sku_name) > 0])
+    error_message = "All databases must have a SKU name specified."
   }
-}
-
-variable "zone_redundant" {
-  description = "(Optional) Enable zone redundancy for high availability. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "tags" {
-  description = "(Optional) Tags to apply to the SQL Database"
-  type        = map(string)
-  default     = {}
-  nullable    = false
 }
