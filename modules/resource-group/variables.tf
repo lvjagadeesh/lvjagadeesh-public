@@ -18,6 +18,12 @@ variable "location" {
   }
 }
 
+variable "managed_by" {
+  description = "(Optional) The ID of the resource or application that manages this Resource Group"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "(Optional) Tags to apply to the resource group"
   type        = map(string)
