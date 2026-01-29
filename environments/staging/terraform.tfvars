@@ -3,7 +3,7 @@ location            = "East US"
 resource_group_name = "staging-rg"
 
 # Virtual Network
-vnet_name         = "staging-vnet"
+vnet_name          = "staging-vnet"
 vnet_address_space = ["10.1.0.0/16"]
 subnets = [
   {
@@ -33,8 +33,8 @@ app_service_plan_sku_name = "S1"
 app_service_name = "staging-app-001"
 
 # SQL Server
-sql_server_name          = "staging-sqlserver-001"
-sql_administrator_login  = "sqladmin"
+sql_server_name            = "staging-sqlserver-001"
+sql_administrator_login    = "sqladmin"
 sql_administrator_password = "ChangeMeInProduction123!"
 
 # SQL Database
@@ -45,11 +45,11 @@ container_registry_name = "stagingacr001"
 container_registry_sku  = "Standard"
 
 # AKS Cluster
-aks_cluster_name        = "staging-aks"
-aks_dns_prefix          = "staging-aks"
-aks_kubernetes_version  = "1.27.0"
-aks_node_pool_vm_size   = "Standard_D2_v2"
-aks_node_pool_count     = 2
+aks_cluster_name       = "staging-aks"
+aks_dns_prefix         = "staging-aks"
+aks_kubernetes_version = "1.27.0"
+aks_node_pool_vm_size  = "Standard_D2_v2"
+aks_node_pool_count    = 2
 
 # Common Tags
 tags = {

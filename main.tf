@@ -53,12 +53,12 @@ module "virtual_network" {
 module "storage_account" {
   source = "./modules/storage-account"
 
-  storage_account_name         = var.storage_account_name
-  resource_group_name          = module.resource_group.resource_group_name
-  location                     = var.location
-  account_tier                 = var.storage_account_tier
-  account_replication_type     = var.storage_account_replication_type
-  tags                         = var.tags
+  storage_account_name     = var.storage_account_name
+  resource_group_name      = module.resource_group.resource_group_name
+  location                 = var.location
+  account_tier             = var.storage_account_tier
+  account_replication_type = var.storage_account_replication_type
+  tags                     = var.tags
 
   depends_on = [module.resource_group]
 }
@@ -144,14 +144,14 @@ module "container_registry" {
 module "aks_cluster" {
   source = "./modules/aks-cluster"
 
-  cluster_name               = var.aks_cluster_name
-  location                   = var.location
-  resource_group_name        = module.resource_group.resource_group_name
-  dns_prefix                 = var.aks_dns_prefix
-  kubernetes_version         = var.aks_kubernetes_version
-  default_node_pool_vm_size  = var.aks_node_pool_vm_size
-  default_node_pool_count    = var.aks_node_pool_count
-  tags                       = var.tags
+  cluster_name              = var.aks_cluster_name
+  location                  = var.location
+  resource_group_name       = module.resource_group.resource_group_name
+  dns_prefix                = var.aks_dns_prefix
+  kubernetes_version        = var.aks_kubernetes_version
+  default_node_pool_vm_size = var.aks_node_pool_vm_size
+  default_node_pool_count   = var.aks_node_pool_count
+  tags                      = var.tags
 
   depends_on = [module.resource_group]
 }

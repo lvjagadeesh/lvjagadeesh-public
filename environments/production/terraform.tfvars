@@ -3,7 +3,7 @@ location            = "East US"
 resource_group_name = "prod-rg"
 
 # Virtual Network
-vnet_name         = "prod-vnet"
+vnet_name          = "prod-vnet"
 vnet_address_space = ["10.2.0.0/16"]
 subnets = [
   {
@@ -37,8 +37,8 @@ app_service_plan_sku_name = "P1v2"
 app_service_name = "prod-app-001"
 
 # SQL Server
-sql_server_name          = "prod-sqlserver-001"
-sql_administrator_login  = "sqladmin"
+sql_server_name            = "prod-sqlserver-001"
+sql_administrator_login    = "sqladmin"
 sql_administrator_password = "ChangeMeInProduction123!"
 
 # SQL Database
@@ -49,11 +49,11 @@ container_registry_name = "prodacr001"
 container_registry_sku  = "Premium"
 
 # AKS Cluster
-aks_cluster_name        = "prod-aks"
-aks_dns_prefix          = "prod-aks"
-aks_kubernetes_version  = "1.27.0"
-aks_node_pool_vm_size   = "Standard_D4_v2"
-aks_node_pool_count     = 3
+aks_cluster_name       = "prod-aks"
+aks_dns_prefix         = "prod-aks"
+aks_kubernetes_version = "1.27.0"
+aks_node_pool_vm_size  = "Standard_D4_v2"
+aks_node_pool_count    = 3
 
 # Common Tags
 tags = {

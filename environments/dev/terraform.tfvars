@@ -3,7 +3,7 @@ location            = "East US"
 resource_group_name = "dev-rg"
 
 # Virtual Network
-vnet_name         = "dev-vnet"
+vnet_name          = "dev-vnet"
 vnet_address_space = ["10.0.0.0/16"]
 subnets = [
   {
@@ -33,8 +33,8 @@ app_service_plan_sku_name = "B1"
 app_service_name = "dev-app-001"
 
 # SQL Server
-sql_server_name          = "dev-sqlserver-001"
-sql_administrator_login  = "sqladmin"
+sql_server_name            = "dev-sqlserver-001"
+sql_administrator_login    = "sqladmin"
 sql_administrator_password = "ChangeMeInProduction123!"
 
 # SQL Database
@@ -45,11 +45,11 @@ container_registry_name = "devacr001"
 container_registry_sku  = "Basic"
 
 # AKS Cluster
-aks_cluster_name        = "dev-aks"
-aks_dns_prefix          = "dev-aks"
-aks_kubernetes_version  = "1.27.0"
-aks_node_pool_vm_size   = "Standard_B2s"
-aks_node_pool_count     = 1
+aks_cluster_name       = "dev-aks"
+aks_dns_prefix         = "dev-aks"
+aks_kubernetes_version = "1.27.0"
+aks_node_pool_vm_size  = "Standard_B2s"
+aks_node_pool_count    = 1
 
 # Common Tags
 tags = {
