@@ -1,6 +1,6 @@
 # Azure Container Registry Terraform Module
 
-This Terraform module creates and manages an Azure Container Registry with comprehensive support for ALL available configuration options from the official AzureRM provider.
+This Terraform module creates and manages Azure Container Registries with comprehensive support for ALL available configuration options from the official AzureRM provider.
 
 ## Features
 
@@ -44,15 +44,53 @@ This module supports all features of the `azurerm_container_registry` resource i
 module "container_registry" {
   source = "./modules/container-registry"
 
-  container_registry_name = "myregistryname"
-  resource_group_name     = "my-resource-group"
-  location                = "East US"
-  sku                     = "Standard"
-  admin_enabled           = false
+  container_registries = {
+    "my_registry" = {
+      name                = "myregistryname"
+      resource_group_name = "my-resource-group"
+      location            = "East US"
+      sku                 = "Standard"
+      admin_enabled       = false
+      tags = {
+        Environment = "Development"
+        ManagedBy   = "Terraform"
+      }
+    }
+  }
+}
+```
 
-  tags = {
-    Environment = "Development"
-    ManagedBy   = "Terraform"
+### Multiple Container Registries Example
+
+```hcl
+module "container_registry" {
+  source = "./modules/container-registry"
+
+  container_registries = {
+    "dev_registry" = {
+      name                = "devacr12345"
+      resource_group_name = "example-rg"
+      location            = "East US"
+      sku                 = "Basic"
+      admin_enabled       = true
+      tags = {
+        Environment = "Development"
+        ManagedBy   = "Terraform"
+      }
+    }
+
+    "prod_registry" = {
+      name                = "prodacr12345"
+      resource_group_name = "example-rg"
+      location            = "East US"
+      sku                 = "Premium"
+      admin_enabled       = false
+      zone_redundancy_enabled = true
+      tags = {
+        Environment = "Production"
+        ManagedBy   = "Terraform"
+      }
+    }
   }
 }
 ```
@@ -63,63 +101,67 @@ module "container_registry" {
 module "container_registry" {
   source = "./modules/container-registry"
 
-  # Required
-  container_registry_name = "premiumacr2024"
-  resource_group_name     = "production-rg"
-  location                = "East US"
+  container_registries = {
+    "premium_registry" = {
+      # Required
+      name                = "premiumacr2024"
+      resource_group_name = "production-rg"
+      location            = "East US"
 
-  # Core configuration
-  sku                           = "Premium"
-  admin_enabled                 = false
-  public_network_access_enabled = true
-  quarantine_policy_enabled     = true
-  zone_redundancy_enabled       = true
-  export_policy_enabled         = true
-  anonymous_pull_enabled        = false
-  data_endpoint_enabled         = true
-  network_rule_bypass_option    = "AzureServices"
+      # Core configuration
+      sku                           = "Premium"
+      admin_enabled                 = false
+      public_network_access_enabled = true
+      quarantine_policy_enabled     = true
+      zone_redundancy_enabled       = true
+      export_policy_enabled         = true
+      anonymous_pull_enabled        = false
+      data_endpoint_enabled         = true
+      network_rule_bypass_option    = "AzureServices"
 
-  # Geo-replications
-  georeplications = [
-    {
-      location                  = "West US"
-      zone_redundancy_enabled   = true
-      regional_endpoint_enabled = false
+      # Geo-replications
+      georeplications = [
+        {
+          location                  = "West US"
+          zone_redundancy_enabled   = true
+          regional_endpoint_enabled = false
+          tags = {
+            ReplicaLocation = "west"
+          }
+        }
+      ]
+
+      # Network rules
+      network_rule_set = {
+        default_action = "Deny"
+        ip_rule = [
+          {
+            action   = "Allow"
+            ip_range = "203.0.113.0/24"
+          }
+        ]
+      }
+
+      # Retention and trust policies
+      retention_policy_in_days = 7
+      trust_policy_enabled     = true
+
+      # Managed identity
+      identity = {
+        type = "SystemAssigned"
+      }
+
+      # Customer-managed encryption
+      encryption = {
+        key_vault_key_id   = "https://example-vault.vault.azure.net/keys/example-key/version"
+        identity_client_id = "00000000-0000-0000-0000-000000000000"
+      }
+
       tags = {
-        ReplicaLocation = "west"
+        Environment = "Production"
+        ManagedBy   = "Terraform"
       }
     }
-  ]
-
-  # Network rules
-  network_rule_set = {
-    default_action = "Deny"
-    ip_rule = [
-      {
-        action   = "Allow"
-        ip_range = "203.0.113.0/24"
-      }
-    ]
-  }
-
-  # Retention and trust policies
-  retention_policy_in_days = 7
-  trust_policy_enabled     = true
-
-  # Managed identity
-  identity = {
-    type = "SystemAssigned"
-  }
-
-  # Customer-managed encryption
-  encryption = {
-    key_vault_key_id   = "https://example-vault.vault.azure.net/keys/example-key/version"
-    identity_client_id = "00000000-0000-0000-0000-000000000000"
-  }
-
-  tags = {
-    Environment = "Production"
-    ManagedBy   = "Terraform"
   }
 }
 ```
@@ -133,15 +175,25 @@ module "container_registry" {
 
 ## Inputs
 
-### Required Inputs
+### Required Input
 
-| Name | Description | Type | Default |
-|------|-------------|------|---------|
-| `container_registry_name` | Name of the Container Registry. Must be globally unique, 5-50 characters, alphanumeric only | `string` | n/a |
-| `resource_group_name` | Name of the resource group where the Container Registry will be created | `string` | n/a |
-| `location` | Azure region where the Container Registry will be created | `string` | n/a |
+| Name | Description | Type |
+|------|-------------|------|
+| `container_registries` | Map of container registries to create. Each key is a unique identifier and value contains the container registry configuration | `map(object)` |
 
-### Optional Inputs
+### Container Registry Configuration Object
+
+Each entry in `container_registries` map supports the following attributes:
+
+#### Required Attributes
+
+| Name | Description | Type |
+|------|-------------|------|
+| `name` | Name of the Container Registry. Must be globally unique, 5-50 characters, alphanumeric only | `string` |
+| `resource_group_name` | Name of the resource group where the Container Registry will be created | `string` |
+| `location` | Azure region where the Container Registry will be created | `string` |
+
+#### Optional Attributes
 
 | Name | Description | Type | Default | SKU Requirement |
 |------|-------------|------|---------|-----------------|
@@ -209,20 +261,21 @@ encryption = {
 
 | Name | Description |
 |------|-------------|
-| `container_registry_id` | The ID of the Container Registry |
-| `container_registry_name` | The name of the Container Registry |
-| `login_server` | The login server URL |
-| `admin_username` | The admin username (if enabled) |
-| `admin_password` | The admin password (if enabled, sensitive) |
-| `identity_principal_id` | The Principal ID of the managed identity |
-| `identity_tenant_id` | The Tenant ID of the managed identity |
-| `sku` | The SKU of the Container Registry |
-| `resource_group_name` | The resource group name |
-| `location` | The location of the Container Registry |
-| `public_network_access_enabled` | Whether public network access is enabled |
-| `admin_enabled` | Whether admin user is enabled |
-| `zone_redundancy_enabled` | Whether zone redundancy is enabled |
-| `data_endpoint_enabled` | Whether dedicated data endpoints are enabled |
+| `container_registries` | Map of all container registries created (excluding sensitive data) |
+| `container_registry_ids` | Map of container registry keys to IDs |
+| `container_registry_names` | Map of container registry keys to names |
+| `login_servers` | Map of container registry keys to login server URLs |
+| `admin_usernames` | Map of container registry keys to admin usernames (if enabled) |
+| `admin_passwords` | Map of container registry keys to admin passwords (if enabled, sensitive) |
+| `identity_principal_ids` | Map of container registry keys to identity principal IDs |
+| `identity_tenant_ids` | Map of container registry keys to identity tenant IDs |
+| `skus` | Map of container registry keys to SKUs |
+| `resource_group_names` | Map of container registry keys to resource group names |
+| `locations` | Map of container registry keys to locations |
+| `public_network_access_enabled` | Map of container registry keys to public network access enabled status |
+| `admin_enabled` | Map of container registry keys to admin enabled status |
+| `zone_redundancy_enabled` | Map of container registry keys to zone redundancy enabled status |
+| `data_endpoint_enabled` | Map of container registry keys to data endpoint enabled status |
 
 ## SKU Feature Matrix
 
@@ -241,8 +294,7 @@ encryption = {
 ## Examples
 
 See the `example` directory for:
-- `terraform.tfvars` - Basic configuration
-- `comprehensive-example.tfvars` - All features demonstrated
+- `terraform.tfvars` - Multiple container registries with various configurations
 
 ## Notes
 
@@ -251,24 +303,6 @@ See the `example` directory for:
 - **Global Uniqueness**: Container Registry names must be globally unique across Azure
 - **Network Rules**: When using network rules, consider allowing Azure services for functionality
 - **Managed Identity**: Required when using customer-managed keys for encryption
-
-## Migration from Previous Version
-
-If you're migrating from the previous version of this module that used `network_rule_default_action`, update to use the new `network_rule_set` structure:
-
-**Old:**
-```hcl
-network_rule_default_action = "Deny"
-```
-
-**New:**
-```hcl
-network_rule_set = {
-  default_action = "Deny"
-}
-```
-
-Or simply omit it if you want no network restrictions (backward compatible - all new variables are optional).
 
 ## Authors
 
