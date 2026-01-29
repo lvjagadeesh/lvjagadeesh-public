@@ -1,916 +1,532 @@
-# ============================================================================
-# REQUIRED VARIABLES
-# ============================================================================
+variable "aks_clusters" {
+  description = "(Required) Map of AKS clusters to create"
+  type = map(object({
+    # ============================================================================
+    # REQUIRED ATTRIBUTES
+    # ============================================================================
+    cluster_name               = string           # (Required) Name of the AKS cluster
+    location                   = string           # (Required) Azure region where the AKS cluster will be created
+    resource_group_name        = string           # (Required) Name of the resource group
+    dns_prefix                 = optional(string) # (Optional) DNS prefix for the AKS cluster
+    dns_prefix_private_cluster = optional(string) # (Optional) DNS prefix for private clusters
 
-variable "cluster_name" {
-  description = "(Required) Name of the AKS cluster. Must be unique within the resource group"
-  type        = string
+    # ============================================================================
+    # CORE CONFIGURATION
+    # ============================================================================
+    kubernetes_version                  = optional(string) # (Optional) Kubernetes version (e.g., 1.27.0, 1.28.0)
+    sku_tier                            = optional(string) # (Optional) SKU Tier: Free, Standard, Premium
+    node_resource_group                 = optional(string) # (Optional) Name of the resource group for cluster nodes
+    automatic_channel_upgrade           = optional(string) # (Optional) Upgrade channel: patch, rapid, node-image, stable, none
+    node_os_channel_upgrade             = optional(string) # (Optional) OS upgrade channel: NodeImage, None, Unmanaged, SecurityPatch
+    azure_policy_enabled                = optional(bool)   # (Optional) Enable Azure Policy for Kubernetes
+    disk_encryption_set_id              = optional(string) # (Optional) ID of the Disk Encryption Set
+    edge_zone                           = optional(string) # (Optional) Edge Zone within the Azure Region
+    http_application_routing_enabled    = optional(bool)   # (Optional) Enable HTTP Application Routing
+    image_cleaner_enabled               = optional(bool)   # (Optional) Enable Image Cleaner
+    image_cleaner_interval_hours        = optional(number) # (Optional) Interval in hours for Image Cleaner
+    local_account_disabled              = optional(bool)   # (Optional) Disable local Kubernetes accounts
+    oidc_issuer_enabled                 = optional(bool)   # (Optional) Enable OIDC Issuer
+    open_service_mesh_enabled           = optional(bool)   # (Optional) Enable Open Service Mesh
+    private_cluster_enabled             = optional(bool)   # (Optional) Enable private cluster
+    private_dns_zone_id                 = optional(string) # (Optional) Private DNS Zone ID
+    private_cluster_public_fqdn_enabled = optional(bool)   # (Optional) Enable public FQDN for private cluster
+    run_command_enabled                 = optional(bool)   # (Optional) Enable Run Command feature
+    workload_identity_enabled           = optional(bool)   # (Optional) Enable Workload Identity
+    support_plan                        = optional(string) # (Optional) Support plan: KubernetesOfficial, AKSLongTermSupport
+    cost_analysis_enabled               = optional(bool)   # (Optional) Enable cost analysis
+
+    # ============================================================================
+    # DEFAULT NODE POOL
+    # ============================================================================
+    default_node_pool_name                   = optional(string)       # (Optional) Name of the default node pool
+    default_node_pool_vm_size                = optional(string)       # (Optional) VM size for nodes
+    default_node_pool_count                  = optional(number)       # (Optional) Initial number of nodes
+    enable_auto_scaling                      = optional(bool)         # (Optional) Enable auto-scaling
+    min_node_count                           = optional(number)       # (Optional) Minimum node count for auto-scaling
+    max_node_count                           = optional(number)       # (Optional) Maximum node count for auto-scaling
+    default_node_pool_zones                  = optional(list(string)) # (Optional) Availability zones
+    default_node_pool_enable_host_encryption = optional(bool)         # (Optional) Enable host encryption
+    default_node_pool_enable_node_public_ip  = optional(bool)         # (Optional) Enable public IP on nodes
+    default_node_pool_max_pods               = optional(number)       # (Optional) Maximum pods per node
+    default_node_pool_node_labels            = optional(map(string))  # (Optional) Labels for nodes
+    default_node_pool_node_taints            = optional(list(string)) # (Optional) Taints for nodes
+    default_node_pool_os_disk_size_gb        = optional(number)       # (Optional) OS disk size in GB
+    default_node_pool_os_disk_type           = optional(string)       # (Optional) OS disk type: Managed, Ephemeral
+    default_node_pool_os_sku                 = optional(string)       # (Optional) OS SKU: Ubuntu, CBLMariner, AzureLinux, Windows2019, Windows2022
+    default_node_pool_vnet_subnet_id         = optional(string)       # (Optional) VNet subnet ID
+    default_node_pool_pod_subnet_id          = optional(string)       # (Optional) Subnet ID for pods
+    default_node_pool_ultra_ssd_enabled      = optional(bool)         # (Optional) Enable Ultra SSD
+    default_node_pool_upgrade_settings = optional(object({            # (Optional) Upgrade settings
+      max_surge = string
+    }))
+
+    # ============================================================================
+    # NETWORK PROFILE
+    # ============================================================================
+    network_plugin      = optional(string)       # (Optional) Network plugin: azure, kubenet, none
+    network_mode        = optional(string)       # (Optional) Network mode: transparent, bridge
+    network_policy      = optional(string)       # (Optional) Network policy: azure, calico, cilium
+    network_plugin_mode = optional(string)       # (Optional) Network plugin mode: overlay
+    dns_service_ip      = optional(string)       # (Optional) IP address for Kubernetes DNS service
+    service_cidr        = optional(string)       # (Optional) CIDR for Kubernetes services
+    service_cidrs       = optional(list(string)) # (Optional) List of service CIDRs for dual-stack
+    pod_cidr            = optional(string)       # (Optional) CIDR for Kubernetes pods
+    pod_cidrs           = optional(list(string)) # (Optional) List of pod CIDRs for dual-stack
+    ip_versions         = optional(list(string)) # (Optional) IP versions: IPv4, IPv6
+    outbound_type       = optional(string)       # (Optional) Outbound routing method
+    load_balancer_sku   = optional(string)       # (Optional) Load balancer SKU: basic, standard
+    load_balancer_profile = optional(object({    # (Optional) Load balancer profile configuration
+      managed_outbound_ip_count   = optional(number)
+      managed_outbound_ipv6_count = optional(number)
+      outbound_ip_address_ids     = optional(list(string))
+      outbound_ip_prefix_ids      = optional(list(string))
+      outbound_ports_allocated    = optional(number)
+      idle_timeout_in_minutes     = optional(number)
+    }))
+    nat_gateway_profile = optional(object({ # (Optional) NAT Gateway profile configuration
+      managed_outbound_ip_count = optional(number)
+      idle_timeout_in_minutes   = optional(number)
+    }))
+    network_data_plane = optional(string) # (Optional) Network data plane: azure, cilium
+
+    # ============================================================================
+    # API SERVER ACCESS PROFILE
+    # ============================================================================
+    api_server_access_profile = optional(object({
+      authorized_ip_ranges = optional(list(string))
+      subnet_id            = optional(string)
+    }))
+
+    # ============================================================================
+    # AUTO SCALER PROFILE
+    # ============================================================================
+    auto_scaler_profile = optional(object({
+      balance_similar_node_groups      = optional(bool)
+      expander                         = optional(string)
+      max_graceful_termination_sec     = optional(number)
+      max_node_provisioning_time       = optional(string)
+      max_unready_nodes                = optional(number)
+      max_unready_percentage           = optional(number)
+      new_pod_scale_up_delay           = optional(string)
+      scale_down_delay_after_add       = optional(string)
+      scale_down_delay_after_delete    = optional(string)
+      scale_down_delay_after_failure   = optional(string)
+      scan_interval                    = optional(string)
+      scale_down_unneeded              = optional(string)
+      scale_down_unready               = optional(string)
+      scale_down_utilization_threshold = optional(number)
+      empty_bulk_delete_max            = optional(number)
+      skip_nodes_with_local_storage    = optional(bool)
+      skip_nodes_with_system_pods      = optional(bool)
+    }))
+
+    # ============================================================================
+    # AZURE ACTIVE DIRECTORY RBAC
+    # ============================================================================
+    azure_active_directory_role_based_access_control = optional(object({
+      tenant_id              = optional(string)
+      admin_group_object_ids = optional(list(string))
+      azure_rbac_enabled     = optional(bool)
+    }))
+
+    # ============================================================================
+    # HTTP PROXY CONFIG
+    # ============================================================================
+    http_proxy_config = optional(object({
+      http_proxy  = optional(string)
+      https_proxy = optional(string)
+      no_proxy    = optional(list(string))
+      trusted_ca  = optional(string)
+    }))
+
+    # ============================================================================
+    # IDENTITY
+    # ============================================================================
+    identity_type = optional(string)       # (Optional) Identity type: SystemAssigned, UserAssigned
+    identity_ids  = optional(list(string)) # (Optional) List of user-assigned identity IDs
+
+    # ============================================================================
+    # KEY MANAGEMENT SERVICE
+    # ============================================================================
+    key_management_service = optional(object({
+      key_vault_key_id         = string
+      key_vault_network_access = optional(string)
+    }))
+
+    # ============================================================================
+    # KEY VAULT SECRETS PROVIDER
+    # ============================================================================
+    key_vault_secrets_provider = optional(object({
+      secret_rotation_enabled  = optional(bool)
+      secret_rotation_interval = optional(string)
+    }))
+
+    # ============================================================================
+    # KUBELET IDENTITY
+    # ============================================================================
+    kubelet_identity = optional(object({
+      client_id                 = optional(string)
+      object_id                 = optional(string)
+      user_assigned_identity_id = optional(string)
+    }))
+
+    # ============================================================================
+    # LINUX PROFILE
+    # ============================================================================
+    linux_profile = optional(object({
+      admin_username = string
+      ssh_key = object({
+        key_data = string
+      })
+    }))
+
+    # ============================================================================
+    # MAINTENANCE WINDOW
+    # ============================================================================
+    maintenance_window = optional(object({
+      allowed = optional(list(object({
+        day   = string
+        hours = list(number)
+      })))
+      not_allowed = optional(list(object({
+        start = string
+        end   = string
+      })))
+    }))
+    maintenance_window_auto_upgrade = optional(object({
+      frequency    = string
+      interval     = number
+      duration     = number
+      day_of_week  = optional(number)
+      day_of_month = optional(number)
+      week_index   = optional(string)
+      start_time   = optional(string)
+      utc_offset   = optional(string)
+      start_date   = optional(string)
+      not_allowed = optional(list(object({
+        start = string
+        end   = string
+      })))
+    }))
+    maintenance_window_node_os = optional(object({
+      frequency    = string
+      interval     = number
+      duration     = number
+      day_of_week  = optional(number)
+      day_of_month = optional(number)
+      week_index   = optional(string)
+      start_time   = optional(string)
+      utc_offset   = optional(string)
+      start_date   = optional(string)
+      not_allowed = optional(list(object({
+        start = string
+        end   = string
+      })))
+    }))
+
+    # ============================================================================
+    # MICROSOFT DEFENDER
+    # ============================================================================
+    microsoft_defender = optional(object({
+      log_analytics_workspace_id = string
+    }))
+
+    # ============================================================================
+    # MONITOR METRICS
+    # ============================================================================
+    monitor_metrics = optional(object({
+      annotations_allowed = optional(string)
+      labels_allowed      = optional(string)
+    }))
+
+    # ============================================================================
+    # OMS AGENT (AZURE MONITOR)
+    # ============================================================================
+    oms_agent = optional(object({
+      log_analytics_workspace_id      = string
+      msi_auth_for_monitoring_enabled = optional(bool)
+    }))
+
+    # ============================================================================
+    # SERVICE MESH PROFILE
+    # ============================================================================
+    service_mesh_profile = optional(object({
+      mode                             = string
+      internal_ingress_gateway_enabled = optional(bool)
+      external_ingress_gateway_enabled = optional(bool)
+    }))
+
+    # ============================================================================
+    # STORAGE PROFILE
+    # ============================================================================
+    storage_profile = optional(object({
+      blob_driver_enabled         = optional(bool)
+      disk_driver_enabled         = optional(bool)
+      file_driver_enabled         = optional(bool)
+      snapshot_controller_enabled = optional(bool)
+    }))
+
+    # ============================================================================
+    # WEB APP ROUTING
+    # ============================================================================
+    web_app_routing = optional(object({
+      dns_zone_ids = list(string)
+    }))
+
+    # ============================================================================
+    # WINDOWS PROFILE
+    # ============================================================================
+    windows_profile = optional(object({
+      admin_username = string
+      admin_password = optional(string)
+      license        = optional(string)
+      gmsa = optional(object({
+        dns_server  = string
+        root_domain = string
+      }))
+    }))
+
+    # ============================================================================
+    # WORKLOAD AUTOSCALER PROFILE
+    # ============================================================================
+    workload_autoscaler_profile = optional(object({
+      keda_enabled                    = optional(bool)
+      vertical_pod_autoscaler_enabled = optional(bool)
+    }))
+
+    # ============================================================================
+    # CONFIDENTIAL COMPUTING
+    # ============================================================================
+    confidential_computing = optional(object({
+      sgx_quote_helper_enabled = bool
+    }))
+
+    # ============================================================================
+    # TAGS
+    # ============================================================================
+    tags = optional(map(string)) # (Optional) Tags to apply to the AKS cluster
+  }))
 
   validation {
-    condition     = can(regex("^[a-zA-Z0-9-]{1,63}$", var.cluster_name))
-    error_message = "Cluster name must be 1-63 characters, alphanumeric and hyphens only."
+    condition     = alltrue([for k, v in var.aks_clusters : length(v.cluster_name) > 0 && length(v.cluster_name) <= 63])
+    error_message = "Cluster name must be between 1 and 63 characters."
   }
-}
-
-variable "location" {
-  description = "(Required) Azure region where the AKS cluster will be created"
-  type        = string
 
   validation {
-    condition     = length(var.location) > 0
-    error_message = "Location must be specified."
+    condition     = alltrue([for k, v in var.aks_clusters : length(v.location) > 0])
+    error_message = "Location must be specified for each cluster."
   }
-}
-
-variable "resource_group_name" {
-  description = "(Required) Name of the resource group where the AKS cluster will be created"
-  type        = string
 
   validation {
-    condition     = length(var.resource_group_name) > 0
-    error_message = "Resource group name must be specified."
+    condition     = alltrue([for k, v in var.aks_clusters : length(v.resource_group_name) > 0])
+    error_message = "Resource group name must be specified for each cluster."
   }
-}
-
-variable "dns_prefix" {
-  description = "(Optional) DNS prefix for the AKS cluster. Required unless dns_prefix_private_cluster is specified"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.dns_prefix == null || can(regex("^[a-zA-Z0-9-]{1,54}$", var.dns_prefix))
-    error_message = "DNS prefix must be 1-54 characters, alphanumeric and hyphens only."
-  }
-}
-
-variable "dns_prefix_private_cluster" {
-  description = "(Optional) DNS prefix for private clusters. Specifies the DNS prefix to use with private clusters"
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.dns_prefix_private_cluster == null || can(regex("^[a-zA-Z0-9-]{1,54}$", var.dns_prefix_private_cluster))
-    error_message = "DNS prefix for private cluster must be 1-54 characters, alphanumeric and hyphens only."
-  }
-}
-
-# ============================================================================
-# CORE CONFIGURATION
-# ============================================================================
-
-variable "kubernetes_version" {
-  description = "(Optional) Kubernetes version (e.g., 1.27.0, 1.28.0). Default: 1.27.0"
-  type        = string
-  default     = "1.27.0"
-  nullable    = false
-
-  validation {
-    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.kubernetes_version))
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.kubernetes_version == null || can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", v.kubernetes_version))
+    ])
     error_message = "Kubernetes version must be in semantic version format (e.g., 1.27.0)."
   }
-}
-
-variable "sku_tier" {
-  description = "(Optional) The SKU Tier for this Kubernetes Cluster. Valid values: Free, Standard, Premium. Default: Free"
-  type        = string
-  default     = "Free"
-  nullable    = false
 
   validation {
-    condition     = contains(["Free", "Standard", "Premium"], var.sku_tier)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.sku_tier == null || contains(["Free", "Standard", "Premium"], v.sku_tier)
+    ])
     error_message = "SKU Tier must be one of: Free, Standard, Premium."
   }
-}
-
-variable "node_resource_group" {
-  description = "(Optional) Name of the resource group for cluster nodes. Auto-generated if not specified"
-  type        = string
-  default     = null
-}
-
-variable "automatic_channel_upgrade" {
-  description = "(Optional) Upgrade channel for cluster. Values: patch, rapid, node-image, stable, none. Default: null"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.automatic_channel_upgrade == null || contains(["patch", "rapid", "node-image", "stable", "none"], var.automatic_channel_upgrade)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.automatic_channel_upgrade == null || contains(["patch", "rapid", "node-image", "stable", "none"], v.automatic_channel_upgrade)
+    ])
     error_message = "Automatic channel upgrade must be one of: patch, rapid, node-image, stable, none."
   }
-}
-
-variable "node_os_channel_upgrade" {
-  description = "(Optional) OS upgrade channel for nodes. Values: NodeImage, None, Unmanaged, SecurityPatch. Default: null"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.node_os_channel_upgrade == null || contains(["NodeImage", "None", "Unmanaged", "SecurityPatch"], var.node_os_channel_upgrade)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.node_os_channel_upgrade == null || contains(["NodeImage", "None", "Unmanaged", "SecurityPatch"], v.node_os_channel_upgrade)
+    ])
     error_message = "Node OS channel upgrade must be one of: NodeImage, None, Unmanaged, SecurityPatch."
   }
-}
-
-variable "azure_policy_enabled" {
-  description = "(Optional) Enable Azure Policy for Kubernetes. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "disk_encryption_set_id" {
-  description = "(Optional) ID of the Disk Encryption Set for OS and data disks"
-  type        = string
-  default     = null
-}
-
-variable "edge_zone" {
-  description = "(Optional) Edge Zone within the Azure Region where the cluster should exist"
-  type        = string
-  default     = null
-}
-
-variable "http_application_routing_enabled" {
-  description = "(Optional) Enable HTTP Application Routing. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "image_cleaner_enabled" {
-  description = "(Optional) Enable Image Cleaner on the cluster. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "image_cleaner_interval_hours" {
-  description = "(Optional) Interval in hours for Image Cleaner to run. Default: 48"
-  type        = number
-  default     = 48
-  nullable    = false
 
   validation {
-    condition     = var.image_cleaner_interval_hours > 0
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.image_cleaner_interval_hours == null || v.image_cleaner_interval_hours > 0
+    ])
     error_message = "Image cleaner interval must be greater than 0."
   }
-}
-
-variable "local_account_disabled" {
-  description = "(Optional) Disable local Kubernetes accounts. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "oidc_issuer_enabled" {
-  description = "(Optional) Enable OIDC Issuer for workload identity. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "open_service_mesh_enabled" {
-  description = "(Optional) Enable Open Service Mesh. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "private_cluster_enabled" {
-  description = "(Optional) Enable private cluster. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "private_dns_zone_id" {
-  description = "(Optional) Private DNS Zone ID for private cluster. Values: System, None, or custom zone ID"
-  type        = string
-  default     = null
-}
-
-variable "private_cluster_public_fqdn_enabled" {
-  description = "(Optional) Enable public FQDN for private cluster. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "run_command_enabled" {
-  description = "(Optional) Enable Run Command feature. Default: true"
-  type        = bool
-  default     = true
-  nullable    = false
-}
-
-variable "workload_identity_enabled" {
-  description = "(Optional) Enable Workload Identity. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "support_plan" {
-  description = "(Optional) Support plan for the cluster. Values: KubernetesOfficial, AKSLongTermSupport. Default: KubernetesOfficial"
-  type        = string
-  default     = "KubernetesOfficial"
-  nullable    = false
 
   validation {
-    condition     = contains(["KubernetesOfficial", "AKSLongTermSupport"], var.support_plan)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.support_plan == null || contains(["KubernetesOfficial", "AKSLongTermSupport"], v.support_plan)
+    ])
     error_message = "Support plan must be one of: KubernetesOfficial, AKSLongTermSupport."
   }
-}
-
-# ============================================================================
-# DEFAULT NODE POOL
-# ============================================================================
-
-variable "default_node_pool_name" {
-  description = "(Optional) Name of the default node pool. Default: default"
-  type        = string
-  default     = "default"
-  nullable    = false
 
   validation {
-    condition     = can(regex("^[a-z0-9]{1,12}$", var.default_node_pool_name))
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.default_node_pool_name == null || can(regex("^[a-z0-9]{1,12}$", v.default_node_pool_name))
+    ])
     error_message = "Node pool name must be 1-12 characters, lowercase alphanumeric only."
   }
-}
-
-variable "default_node_pool_vm_size" {
-  description = "(Optional) VM size for nodes in the default pool (e.g., Standard_D2_v2, Standard_D4_v3). Default: Standard_D2_v2"
-  type        = string
-  default     = "Standard_D2_v2"
-  nullable    = false
 
   validation {
-    condition     = length(var.default_node_pool_vm_size) > 0
-    error_message = "VM size must be specified."
-  }
-}
-
-variable "default_node_pool_count" {
-  description = "(Optional) Initial number of nodes in the default node pool. Default: 3"
-  type        = number
-  default     = 3
-  nullable    = false
-
-  validation {
-    condition     = var.default_node_pool_count >= 1 && var.default_node_pool_count <= 1000
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.default_node_pool_count == null || (v.default_node_pool_count >= 1 && v.default_node_pool_count <= 1000)
+    ])
     error_message = "Node pool count must be between 1 and 1000."
   }
-}
-
-variable "enable_auto_scaling" {
-  description = "(Optional) Enable auto-scaling for the default node pool. Default: true"
-  type        = bool
-  default     = true
-  nullable    = false
-}
-
-variable "min_node_count" {
-  description = "(Optional) Minimum node count when auto-scaling is enabled. Default: 1"
-  type        = number
-  default     = 1
-  nullable    = false
 
   validation {
-    condition     = var.min_node_count >= 1
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.min_node_count == null || v.min_node_count >= 1
+    ])
     error_message = "Minimum node count must be at least 1."
   }
-}
-
-variable "max_node_count" {
-  description = "(Optional) Maximum node count when auto-scaling is enabled. Default: 5"
-  type        = number
-  default     = 5
-  nullable    = false
 
   validation {
-    condition     = var.max_node_count >= 1 && var.max_node_count <= 1000
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.max_node_count == null || (v.max_node_count >= 1 && v.max_node_count <= 1000)
+    ])
     error_message = "Maximum node count must be between 1 and 1000."
   }
-}
-
-variable "default_node_pool_zones" {
-  description = "(Optional) Availability zones for the default node pool. Example: [1, 2, 3]"
-  type        = list(string)
-  default     = null
-}
-
-variable "default_node_pool_enable_host_encryption" {
-  description = "(Optional) Enable host encryption on default node pool. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "default_node_pool_enable_node_public_ip" {
-  description = "(Optional) Enable public IP on default node pool nodes. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "default_node_pool_max_pods" {
-  description = "(Optional) Maximum pods per node in default pool. Default: 30"
-  type        = number
-  default     = 30
-  nullable    = false
 
   validation {
-    condition     = var.default_node_pool_max_pods >= 10 && var.default_node_pool_max_pods <= 250
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.default_node_pool_max_pods == null || (v.default_node_pool_max_pods >= 10 && v.default_node_pool_max_pods <= 250)
+    ])
     error_message = "Max pods must be between 10 and 250."
   }
-}
-
-variable "default_node_pool_node_labels" {
-  description = "(Optional) Labels for nodes in the default pool"
-  type        = map(string)
-  default     = {}
-  nullable    = false
-}
-
-variable "default_node_pool_node_taints" {
-  description = "(Optional) Taints for nodes in the default pool"
-  type        = list(string)
-  default     = []
-  nullable    = false
-}
-
-variable "default_node_pool_os_disk_size_gb" {
-  description = "(Optional) OS disk size in GB for default node pool. Default: 128"
-  type        = number
-  default     = 128
-  nullable    = false
 
   validation {
-    condition     = var.default_node_pool_os_disk_size_gb >= 30
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.default_node_pool_os_disk_size_gb == null || v.default_node_pool_os_disk_size_gb >= 30
+    ])
     error_message = "OS disk size must be at least 30 GB."
   }
-}
-
-variable "default_node_pool_os_disk_type" {
-  description = "(Optional) OS disk type. Values: Managed, Ephemeral. Default: Managed"
-  type        = string
-  default     = "Managed"
-  nullable    = false
 
   validation {
-    condition     = contains(["Managed", "Ephemeral"], var.default_node_pool_os_disk_type)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.default_node_pool_os_disk_type == null || contains(["Managed", "Ephemeral"], v.default_node_pool_os_disk_type)
+    ])
     error_message = "OS disk type must be Managed or Ephemeral."
   }
-}
-
-variable "default_node_pool_os_sku" {
-  description = "(Optional) OS SKU. Values: Ubuntu, CBLMariner, Windows2019, Windows2022. Default: Ubuntu"
-  type        = string
-  default     = "Ubuntu"
-  nullable    = false
 
   validation {
-    condition     = contains(["Ubuntu", "CBLMariner", "Windows2019", "Windows2022", "AzureLinux"], var.default_node_pool_os_sku)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.default_node_pool_os_sku == null || contains(["Ubuntu", "CBLMariner", "Windows2019", "Windows2022", "AzureLinux"], v.default_node_pool_os_sku)
+    ])
     error_message = "OS SKU must be Ubuntu, CBLMariner, AzureLinux, Windows2019, or Windows2022."
   }
-}
-
-variable "default_node_pool_vnet_subnet_id" {
-  description = "(Optional) VNet subnet ID for the default node pool"
-  type        = string
-  default     = null
-}
-
-variable "default_node_pool_pod_subnet_id" {
-  description = "(Optional) Subnet ID for pods in the default node pool"
-  type        = string
-  default     = null
-}
-
-variable "default_node_pool_ultra_ssd_enabled" {
-  description = "(Optional) Enable Ultra SSD on default node pool. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-variable "default_node_pool_upgrade_settings" {
-  description = "(Optional) Upgrade settings for default node pool. max_surge: string"
-  type = object({
-    max_surge = string
-  })
-  default = null
-}
-
-# ============================================================================
-# NETWORK PROFILE
-# ============================================================================
-
-variable "network_plugin" {
-  description = "(Optional) Network plugin to use. Valid values: azure, kubenet, none. Default: azure"
-  type        = string
-  default     = "azure"
-  nullable    = false
 
   validation {
-    condition     = contains(["azure", "kubenet", "none"], var.network_plugin)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.network_plugin == null || contains(["azure", "kubenet", "none"], v.network_plugin)
+    ])
     error_message = "Network plugin must be one of: azure, kubenet, none."
   }
-}
-
-variable "network_mode" {
-  description = "(Optional) Network mode for the network plugin. Values: transparent, bridge. Default: null"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.network_mode == null || contains(["transparent", "bridge"], var.network_mode)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.network_mode == null || contains(["transparent", "bridge"], v.network_mode)
+    ])
     error_message = "Network mode must be transparent or bridge."
   }
-}
-
-variable "network_policy" {
-  description = "(Optional) Network policy for cluster. Values: azure, calico, cilium. Default: null"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.network_policy == null || contains(["azure", "calico", "cilium"], var.network_policy)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.network_policy == null || contains(["azure", "calico", "cilium"], v.network_policy)
+    ])
     error_message = "Network policy must be azure, calico, or cilium."
   }
-}
-
-variable "network_plugin_mode" {
-  description = "(Optional) Network plugin mode. Values: overlay. Default: null"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.network_plugin_mode == null || var.network_plugin_mode == "overlay"
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.network_plugin_mode == null || v.network_plugin_mode == "overlay"
+    ])
     error_message = "Network plugin mode must be overlay."
   }
-}
-
-variable "dns_service_ip" {
-  description = "(Optional) IP address for the Kubernetes DNS service. Must be within service_cidr"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.dns_service_ip == null || can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$", var.dns_service_ip))
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.dns_service_ip == null || can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$", v.dns_service_ip))
+    ])
     error_message = "DNS service IP must be a valid IPv4 address."
   }
-}
-
-variable "service_cidr" {
-  description = "(Optional) CIDR for Kubernetes services. Default: null"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.service_cidr == null || can(cidrhost(var.service_cidr, 0))
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.service_cidr == null || can(cidrhost(v.service_cidr, 0))
+    ])
     error_message = "Service CIDR must be a valid CIDR notation."
   }
-}
-
-variable "service_cidrs" {
-  description = "(Optional) List of service CIDRs for dual-stack clusters"
-  type        = list(string)
-  default     = null
-}
-
-variable "pod_cidr" {
-  description = "(Optional) CIDR for Kubernetes pods. Used with kubenet. Default: null"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.pod_cidr == null || can(cidrhost(var.pod_cidr, 0))
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.pod_cidr == null || can(cidrhost(v.pod_cidr, 0))
+    ])
     error_message = "Pod CIDR must be a valid CIDR notation."
   }
-}
-
-variable "pod_cidrs" {
-  description = "(Optional) List of pod CIDRs for dual-stack clusters"
-  type        = list(string)
-  default     = null
-}
-
-variable "ip_versions" {
-  description = "(Optional) IP versions for the cluster. Values: IPv4, IPv6"
-  type        = list(string)
-  default     = ["IPv4"]
-  nullable    = false
 
   validation {
-    condition     = alltrue([for v in var.ip_versions : contains(["IPv4", "IPv6"], v)])
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.ip_versions == null || alltrue([for ver in v.ip_versions : contains(["IPv4", "IPv6"], ver)])
+    ])
     error_message = "IP versions must be IPv4 and/or IPv6."
   }
-}
-
-variable "outbound_type" {
-  description = "(Optional) Outbound routing method. Values: loadBalancer, userDefinedRouting, managedNATGateway, userAssignedNATGateway. Default: loadBalancer"
-  type        = string
-  default     = "loadBalancer"
-  nullable    = false
 
   validation {
-    condition     = contains(["loadBalancer", "userDefinedRouting", "managedNATGateway", "userAssignedNATGateway"], var.outbound_type)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.outbound_type == null || contains(["loadBalancer", "userDefinedRouting", "managedNATGateway", "userAssignedNATGateway"], v.outbound_type)
+    ])
     error_message = "Outbound type must be loadBalancer, userDefinedRouting, managedNATGateway, or userAssignedNATGateway."
   }
-}
-
-variable "load_balancer_sku" {
-  description = "(Optional) Load balancer SKU. Valid values: basic, standard. Default: standard"
-  type        = string
-  default     = "standard"
-  nullable    = false
 
   validation {
-    condition     = contains(["basic", "standard"], var.load_balancer_sku)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.load_balancer_sku == null || contains(["basic", "standard"], v.load_balancer_sku)
+    ])
     error_message = "Load balancer SKU must be either basic or standard."
   }
-}
-
-variable "load_balancer_profile" {
-  description = "(Optional) Load balancer profile configuration"
-  type = object({
-    managed_outbound_ip_count   = optional(number)
-    managed_outbound_ipv6_count = optional(number)
-    outbound_ip_address_ids     = optional(list(string))
-    outbound_ip_prefix_ids      = optional(list(string))
-    outbound_ports_allocated    = optional(number)
-    idle_timeout_in_minutes     = optional(number)
-  })
-  default = null
-}
-
-variable "nat_gateway_profile" {
-  description = "(Optional) NAT Gateway profile configuration"
-  type = object({
-    managed_outbound_ip_count = optional(number)
-    idle_timeout_in_minutes   = optional(number)
-  })
-  default = null
-}
-
-variable "network_data_plane" {
-  description = "(Optional) Network data plane. Values: azure, cilium. Default: null"
-  type        = string
-  default     = null
 
   validation {
-    condition     = var.network_data_plane == null || contains(["azure", "cilium"], var.network_data_plane)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.network_data_plane == null || contains(["azure", "cilium"], v.network_data_plane)
+    ])
     error_message = "Network data plane must be azure or cilium."
   }
-}
-
-# ============================================================================
-# API SERVER ACCESS PROFILE
-# ============================================================================
-
-variable "api_server_access_profile" {
-  description = "(Optional) API server access profile configuration"
-  type = object({
-    authorized_ip_ranges = optional(list(string))
-    subnet_id            = optional(string)
-  })
-  default = null
-}
-
-# ============================================================================
-# AUTO SCALER PROFILE
-# ============================================================================
-
-variable "auto_scaler_profile" {
-  description = "(Optional) Auto scaler profile configuration"
-  type = object({
-    balance_similar_node_groups      = optional(bool)
-    expander                         = optional(string)
-    max_graceful_termination_sec     = optional(number)
-    max_node_provisioning_time       = optional(string)
-    max_unready_nodes                = optional(number)
-    max_unready_percentage           = optional(number)
-    new_pod_scale_up_delay           = optional(string)
-    scale_down_delay_after_add       = optional(string)
-    scale_down_delay_after_delete    = optional(string)
-    scale_down_delay_after_failure   = optional(string)
-    scan_interval                    = optional(string)
-    scale_down_unneeded              = optional(string)
-    scale_down_unready               = optional(string)
-    scale_down_utilization_threshold = optional(number)
-    empty_bulk_delete_max            = optional(number)
-    skip_nodes_with_local_storage    = optional(bool)
-    skip_nodes_with_system_pods      = optional(bool)
-  })
-  default = null
-}
-
-# ============================================================================
-# AZURE ACTIVE DIRECTORY RBAC
-# ============================================================================
-
-variable "azure_active_directory_role_based_access_control" {
-  description = "(Optional) Azure Active Directory RBAC configuration"
-  type = object({
-    tenant_id              = optional(string)
-    admin_group_object_ids = optional(list(string))
-    azure_rbac_enabled     = optional(bool)
-  })
-  default = null
-}
-
-# ============================================================================
-# HTTP PROXY CONFIG
-# ============================================================================
-
-variable "http_proxy_config" {
-  description = "(Optional) HTTP proxy configuration"
-  type = object({
-    http_proxy  = optional(string)
-    https_proxy = optional(string)
-    no_proxy    = optional(list(string))
-    trusted_ca  = optional(string)
-  })
-  default = null
-}
-
-# ============================================================================
-# IDENTITY
-# ============================================================================
-
-variable "identity_type" {
-  description = "(Optional) Identity type. Values: SystemAssigned, UserAssigned. Default: SystemAssigned"
-  type        = string
-  default     = "SystemAssigned"
-  nullable    = false
 
   validation {
-    condition     = contains(["SystemAssigned", "UserAssigned"], var.identity_type)
+    condition = alltrue([
+      for k, v in var.aks_clusters :
+      v.identity_type == null || contains(["SystemAssigned", "UserAssigned"], v.identity_type)
+    ])
     error_message = "Identity type must be SystemAssigned or UserAssigned."
   }
-}
-
-variable "identity_ids" {
-  description = "(Optional) List of user-assigned identity IDs. Required when identity_type is UserAssigned"
-  type        = list(string)
-  default     = null
-}
-
-# ============================================================================
-# KEY MANAGEMENT SERVICE
-# ============================================================================
-
-variable "key_management_service" {
-  description = "(Optional) Key Management Service configuration"
-  type = object({
-    key_vault_key_id         = string
-    key_vault_network_access = optional(string)
-  })
-  default = null
-}
-
-# ============================================================================
-# KEY VAULT SECRETS PROVIDER
-# ============================================================================
-
-variable "key_vault_secrets_provider" {
-  description = "(Optional) Key Vault Secrets Provider configuration"
-  type = object({
-    secret_rotation_enabled  = optional(bool)
-    secret_rotation_interval = optional(string)
-  })
-  default = null
-}
-
-# ============================================================================
-# KUBELET IDENTITY
-# ============================================================================
-
-variable "kubelet_identity" {
-  description = "(Optional) Kubelet identity configuration"
-  type = object({
-    client_id                 = optional(string)
-    object_id                 = optional(string)
-    user_assigned_identity_id = optional(string)
-  })
-  default = null
-}
-
-# ============================================================================
-# LINUX PROFILE
-# ============================================================================
-
-variable "linux_profile" {
-  description = "(Optional) Linux profile configuration for SSH access"
-  type = object({
-    admin_username = string
-    ssh_key = object({
-      key_data = string
-    })
-  })
-  default = null
-}
-
-# ============================================================================
-# MAINTENANCE WINDOW
-# ============================================================================
-
-variable "maintenance_window" {
-  description = "(Optional) Maintenance window configuration"
-  type = object({
-    allowed = optional(list(object({
-      day   = string
-      hours = list(number)
-    })))
-    not_allowed = optional(list(object({
-      start = string
-      end   = string
-    })))
-  })
-  default = null
-}
-
-variable "maintenance_window_auto_upgrade" {
-  description = "(Optional) Maintenance window for auto-upgrades"
-  type = object({
-    frequency    = string
-    interval     = number
-    duration     = number
-    day_of_week  = optional(number)
-    day_of_month = optional(number)
-    week_index   = optional(string)
-    start_time   = optional(string)
-    utc_offset   = optional(string)
-    start_date   = optional(string)
-    not_allowed = optional(list(object({
-      start = string
-      end   = string
-    })))
-  })
-  default = null
-}
-
-variable "maintenance_window_node_os" {
-  description = "(Optional) Maintenance window for node OS updates"
-  type = object({
-    frequency    = string
-    interval     = number
-    duration     = number
-    day_of_week  = optional(number)
-    day_of_month = optional(number)
-    week_index   = optional(string)
-    start_time   = optional(string)
-    utc_offset   = optional(string)
-    start_date   = optional(string)
-    not_allowed = optional(list(object({
-      start = string
-      end   = string
-    })))
-  })
-  default = null
-}
-
-# ============================================================================
-# MICROSOFT DEFENDER
-# ============================================================================
-
-variable "microsoft_defender" {
-  description = "(Optional) Microsoft Defender configuration"
-  type = object({
-    log_analytics_workspace_id = string
-  })
-  default = null
-}
-
-# ============================================================================
-# MONITOR METRICS
-# ============================================================================
-
-variable "monitor_metrics" {
-  description = "(Optional) Monitor metrics configuration"
-  type = object({
-    annotations_allowed = optional(string)
-    labels_allowed      = optional(string)
-  })
-  default = null
-}
-
-# ============================================================================
-# OMS AGENT (AZURE MONITOR)
-# ============================================================================
-
-variable "oms_agent" {
-  description = "(Optional) OMS Agent (Azure Monitor) configuration"
-  type = object({
-    log_analytics_workspace_id      = string
-    msi_auth_for_monitoring_enabled = optional(bool)
-  })
-  default = null
-}
-
-# ============================================================================
-# SERVICE MESH PROFILE
-# ============================================================================
-
-variable "service_mesh_profile" {
-  description = "(Optional) Service mesh profile configuration"
-  type = object({
-    mode                             = string
-    internal_ingress_gateway_enabled = optional(bool)
-    external_ingress_gateway_enabled = optional(bool)
-  })
-  default = null
-}
-
-# ============================================================================
-# STORAGE PROFILE
-# ============================================================================
-
-variable "storage_profile" {
-  description = "(Optional) Storage profile configuration"
-  type = object({
-    blob_driver_enabled         = optional(bool)
-    disk_driver_enabled         = optional(bool)
-    file_driver_enabled         = optional(bool)
-    snapshot_controller_enabled = optional(bool)
-  })
-  default = null
-}
-
-# ============================================================================
-# WEB APP ROUTING
-# ============================================================================
-
-variable "web_app_routing" {
-  description = "(Optional) Web app routing configuration"
-  type = object({
-    dns_zone_ids = list(string)
-  })
-  default = null
-}
-
-# ============================================================================
-# WINDOWS PROFILE
-# ============================================================================
-
-variable "windows_profile" {
-  description = "(Optional) Windows profile configuration for Windows node pools"
-  type = object({
-    admin_username = string
-    admin_password = optional(string)
-    license        = optional(string)
-    gmsa = optional(object({
-      dns_server  = string
-      root_domain = string
-    }))
-  })
-  default = null
-}
-
-# ============================================================================
-# WORKLOAD AUTOSCALER PROFILE
-# ============================================================================
-
-variable "workload_autoscaler_profile" {
-  description = "(Optional) Workload autoscaler profile configuration"
-  type = object({
-    keda_enabled                    = optional(bool)
-    vertical_pod_autoscaler_enabled = optional(bool)
-  })
-  default = null
-}
-
-# ============================================================================
-# CONFIDENTIAL COMPUTING
-# ============================================================================
-
-variable "confidential_computing" {
-  description = "(Optional) Confidential computing configuration"
-  type = object({
-    sgx_quote_helper_enabled = bool
-  })
-  default = null
-}
-
-# ============================================================================
-# COST ANALYSIS
-# ============================================================================
-
-variable "cost_analysis_enabled" {
-  description = "(Optional) Enable cost analysis. Default: false"
-  type        = bool
-  default     = false
-  nullable    = false
-}
-
-# ============================================================================
-# TAGS
-# ============================================================================
-
-variable "tags" {
-  description = "(Optional) Tags to apply to the AKS cluster"
-  type        = map(string)
-  default     = {}
-  nullable    = false
 }
