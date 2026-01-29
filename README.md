@@ -1,59 +1,108 @@
-# Azure Terraform Infrastructure
+# Azure Terraform Infrastructure - Modular & Independent Design
 
-Production-ready Azure Terraform infrastructure with modular design, multi-environment support, and automated CI/CD pipelines.
+Production-ready Azure Terraform infrastructure with fully independent modules, for_each pattern support, and latest provider versions.
 
 ## 📋 Overview
 
-This repository contains Terraform modules and configurations for deploying a complete Azure infrastructure stack. It includes 10 reusable modules covering essential Azure services with best practices for security, scalability, and maintainability.
+This repository contains **10 independent Azure Terraform modules** that can be used individually or together. Each module is designed as a standalone layer with no dependencies on other modules, making them perfect for reuse across different projects.
 
-## 🏗️ Architecture
+### Key Features
 
-### Modules
+- ✅ **Latest Versions**: Terraform 1.14.0+ and AzureRM Provider 4.58+
+- ✅ **Independent Modules**: No cross-module dependencies
+- ✅ **for_each Pattern**: Create multiple instances of any resource
+- ✅ **Required/Optional Variables**: Clearly marked with validation
+- ✅ **Modular Design**: Pick any module without needing others
+- ✅ **Production Ready**: Security best practices and comprehensive validation
 
-The infrastructure is organized into 10 modular components:
+## 🏗️ Module Architecture
 
-1. **Resource Group** - Base resource organization
-2. **Virtual Network** - Network infrastructure with subnets
-3. **Storage Account** - Blob storage with security features
-4. **Key Vault** - Secrets and key management
-5. **App Service Plan** - Hosting plan for web applications
-6. **App Service** - Web application hosting
-7. **SQL Server** - Managed SQL Server instance
-8. **SQL Database** - SQL Database
-9. **Container Registry** - Docker container registry
-10. **AKS Cluster** - Kubernetes cluster for container orchestration
+### Available Modules
+
+Each module can be used independently:
+
+1. **resource-group** - Azure Resource Group management
+2. **virtual-network** - VNet with subnet configuration
+3. **storage-account** - Blob storage with advanced features
+4. **key-vault** - Secrets and key management
+5. **app-service-plan** - App Service hosting plan
+6. **app-service** - Web application hosting
+7. **sql-server** - Managed SQL Server
+8. **sql-database** - SQL Database
+9. **container-registry** - Azure Container Registry (ACR)
+10. **aks-cluster** - Azure Kubernetes Service (AKS)
 
 ### Module Structure
 
 Each module follows a consistent structure:
 
 ```
-modules/<resource-name>/
+modules/<module-name>/
 ├── main.tf          # Resource definitions
-├── variables.tf     # Input variables
+├── variables.tf     # Input variables (Required/Optional marked)
 ├── outputs.tf       # Output values
-├── provider.tf      # Provider configuration
+├── provider.tf      # Terraform & Provider version constraints
 └── example/
     └── terraform.tfvars  # Example usage
 ```
 
-## 🚀 Getting Started
+## 🚀 Usage
 
-### Prerequisites
+### Using Individual Modules
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-- Azure subscription with appropriate permissions
-- Azure Storage Account for Terraform state (for remote backend)
+You can use any module independently in your project:
 
-### Azure Authentication
+```hcl
+# Example: Using just the resource-group module
+module "my_resource_group" {
+  source = "git::https://github.com/lvjagadeesh/lvjagadeesh-public.git//modules/resource-group?ref=main"
 
-```bash
-# Login to Azure
-az login
+  resource_group_name = "my-rg"
+  location            = "East US"
+  tags = {
+    Environment = "Production"
+  }
+}
+```
 
-# Set your subscription
-az account set --subscription "<subscription-id>"
+### Using Multiple Instances with for_each
+
+The root configuration uses `for_each` to enable creating multiple instances:
+
+```hcl
+# Create multiple resource groups
+resource_groups = {
+  "primary" = {
+    name     = "prod-rg-primary"
+    location = "East US"
+  }
+  "secondary" = {
+    name     = "prod-rg-secondary"
+    location = "West US"
+  }
+}
+
+# Create multiple virtual networks
+virtual_networks = {
+  "vnet1" = {
+    name                = "prod-vnet-1"
+    address_space       = ["10.0.0.0/16"]
+    location            = "East US"
+    resource_group_name = "prod-rg-primary"  # Direct reference
+    subnets = [
+      {
+        name             = "subnet1"
+        address_prefixes = ["10.0.1.0/24"]
+      }
+    ]
+  }
+  "vnet2" = {
+    name                = "prod-vnet-2"
+    address_space       = ["10.1.0.0/16"]
+    location            = "West US"
+    resource_group_name = "prod-rg-secondary"
+  }
+}
 ```
 
 ### Local Development
@@ -69,225 +118,211 @@ az account set --subscription "<subscription-id>"
    terraform init
    ```
 
-3. **Select an environment and plan**
+3. **Create your tfvars file**
    ```bash
-   terraform plan -var-file="environments/dev/terraform.tfvars"
+   cp environments/dev/terraform.tfvars.example my-config.tfvars
+   # Edit my-config.tfvars with your values
    ```
 
-4. **Apply the configuration**
+4. **Plan and Apply**
    ```bash
-   terraform apply -var-file="environments/dev/terraform.tfvars"
+   terraform plan -var-file="my-config.tfvars"
+   terraform apply -var-file="my-config.tfvars"
    ```
 
-## 🌍 Environments
+## 📝 Module Independence
 
-Three pre-configured environments are available:
+### No Cross-Module Dependencies
 
-- **dev** - Development environment with minimal resources
-- **staging** - Staging environment with moderate resources
-- **production** - Production environment with full redundancy and scaling
-
-Each environment has its own tfvars file in `environments/<env>/terraform.tfvars`.
-
-### Environment Configuration
-
-Modify the tfvars files to customize your deployment:
+All modules are independent and don't reference each other's outputs. Instead, they accept resource identifiers as inputs:
 
 ```hcl
-# environments/dev/terraform.tfvars
-location            = "East US"
-resource_group_name = "dev-rg"
-vnet_name          = "dev-vnet"
-# ... additional variables
+# ❌ OLD: Modules depended on each other
+module "vnet" {
+  resource_group_name = module.resource_group.name  # Dependency
+}
+
+# ✅ NEW: Modules are independent
+module "vnet" {
+  resource_group_name = "my-rg"  # Direct input
+}
 ```
 
-## 🔄 CI/CD Pipeline
+### Using Modules in Other Projects
 
-### GitHub Actions Workflow
+Since modules are independent, you can easily use them in any project:
 
-The repository includes a production-ready GitHub Actions workflow that:
+```hcl
+# In your project's main.tf
+module "my_storage" {
+  source = "git::https://github.com/lvjagadeesh/lvjagadeesh-public.git//modules/storage-account?ref=main"
 
-- ✅ Validates Terraform syntax and formatting
-- 📋 Generates and posts plan results on PRs
-- 🚀 Automatically applies changes to dev on main branch
-- 🎯 Supports manual deployment to any environment
-- 🗑️ Includes destroy workflow for cleanup
-
-### Required Secrets
-
-Configure these secrets in your GitHub repository:
-
-```
-AZURE_CLIENT_ID           # Azure Service Principal Client ID
-AZURE_TENANT_ID           # Azure Tenant ID
-AZURE_SUBSCRIPTION_ID     # Azure Subscription ID
-TFSTATE_RESOURCE_GROUP    # Resource group for Terraform state
-TFSTATE_STORAGE_ACCOUNT   # Storage account for Terraform state
-TFSTATE_CONTAINER         # Container name for Terraform state
+  storage_account_name     = "mystorageacct"
+  resource_group_name      = "existing-rg"  # Reference existing RG
+  location                 = "East US"
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+}
 ```
 
-### Workflow Triggers
+## 🔧 Variables
 
-- **Push to main/develop** - Validates and plans changes
-- **Pull Request** - Validates, plans, and comments results
-- **Manual Dispatch** - Deploy to any environment on-demand
+### Required vs Optional
 
-## 📦 Module Usage
+All variables are clearly marked:
 
-### Example: Using the Resource Group Module
+```hcl
+variable "resource_group_name" {
+  description = "(Required) Name of the resource group"
+  type        = string
+  
+  validation {
+    condition     = length(var.resource_group_name) > 0
+    error_message = "Resource group name must be specified."
+  }
+}
+
+variable "tags" {
+  description = "(Optional) Tags to apply"
+  type        = map(string)
+  default     = {}
+  nullable    = false
+}
+```
+
+### Variable Validation
+
+All modules include comprehensive validation:
+
+- Name length and format checks
+- Valid value constraints (SKUs, versions, etc.)
+- Required field enforcement
+- Logical consistency checks
+
+## 📦 for_each Pattern
+
+### Root Configuration
+
+The root `main.tf` uses `for_each` for all modules:
 
 ```hcl
 module "resource_group" {
-  source = "./modules/resource-group"
+  source   = "./modules/resource-group"
+  for_each = var.resource_groups
 
-  resource_group_name = "my-rg"
-  location            = "East US"
-  tags = {
-    Environment = "Production"
-    ManagedBy   = "Terraform"
+  resource_group_name = each.value.name
+  location            = each.value.location
+  tags                = merge(var.common_tags, lookup(each.value, "tags", {}))
+}
+```
+
+### Benefits
+
+- Create multiple instances of any resource
+- Clean, maintainable configuration
+- Easy to add/remove resources
+- No need to copy-paste module blocks
+
+## 🌍 Environment Configuration
+
+Example environment structure:
+
+```hcl
+# environments/production/terraform.tfvars
+common_tags = {
+  Environment = "Production"
+  ManagedBy   = "Terraform"
+}
+
+resource_groups = {
+  "app" = {
+    name     = "prod-app-rg"
+    location = "East US"
+  }
+  "data" = {
+    name     = "prod-data-rg"
+    location = "East US"
+  }
+}
+
+storage_accounts = {
+  "app_storage" = {
+    name                     = "prodappstorage"
+    resource_group_name      = "prod-app-rg"
+    location                 = "East US"
+    account_replication_type = "GRS"
   }
 }
 ```
 
-### Example: Using the Virtual Network Module
+## 🔒 Security
+
+- TLS 1.2+ minimum enforced
+- Network rules default to Deny
+- Managed identities for authentication
+- Key Vault integration ready
+- No hardcoded secrets
+- Comprehensive input validation
+
+### Secret Management
+
+```bash
+# Use environment variables
+export TF_VAR_sql_servers='{"sql1": {"administrator_login_password": "SecureP@ssw0rd!"}}'
+
+# Or use terraform.tfvars (never commit!)
+echo 'sql_servers = { ... password = "SecureP@ssw0rd!" }' > secrets.auto.tfvars
+```
+
+## 📊 Outputs
+
+Outputs use the same for_each pattern:
 
 ```hcl
-module "virtual_network" {
-  source = "./modules/virtual-network"
-
-  vnet_name           = "my-vnet"
-  address_space       = ["10.0.0.0/16"]
-  location            = "East US"
-  resource_group_name = module.resource_group.resource_group_name
-  
-  subnets = [
-    {
-      name             = "subnet1"
-      address_prefixes = ["10.0.1.0/24"]
+# Access outputs
+output "resource_groups" {
+  value = {
+    for k, rg in module.resource_group : k => {
+      name = rg.resource_group_name
+      id   = rg.resource_group_id
     }
-  ]
+  }
 }
 ```
 
-## 🔒 Security Best Practices
+## 🔄 CI/CD Integration
 
-- ✅ TLS 1.2 minimum for all services
-- ✅ Managed identities for service authentication
-- ✅ Network security rules with deny-by-default
-- ✅ Key Vault for secrets management
-- ✅ Soft delete and purge protection enabled
-- ✅ Storage account encryption at rest
-- ✅ SQL Server firewall rules
-- ✅ Passwords not hardcoded in tfvars files
+The GitHub Actions workflow supports the new pattern:
 
-### Handling Sensitive Data
+- Validates all modules independently
+- Supports multi-instance deployments
+- Environment-specific configurations
+- Automated security scanning
 
-**Never commit sensitive data to version control.** The environment tfvars files contain placeholder values for passwords. Before deploying:
+## 📖 Examples
 
-1. **Option 1: Use Environment Variables**
-   ```bash
-   export TF_VAR_sql_administrator_password="YourSecurePassword"
-   terraform apply -var-file="environments/dev/terraform.tfvars"
-   ```
+See `environments/dev/terraform.tfvars.example` for a complete example with:
+- Multiple resource groups
+- Independent module configuration
+- Optional and required parameters
+- Best practices
 
-2. **Option 2: Use Azure Key Vault**
-   ```bash
-   # Retrieve password from Key Vault
-   az keyvault secret show --name sql-admin-password --vault-name your-kv --query value -o tsv
-   ```
+## 🤝 Contributing
 
-3. **Option 3: Use GitHub Secrets (for CI/CD)**
-   - Store sensitive values as GitHub secrets
-   - Reference them in the workflow using `${{ secrets.SQL_ADMIN_PASSWORD }}`
+When adding new modules:
+1. Follow the existing structure
+2. Mark all variables as (Required) or (Optional)
+3. Add comprehensive validation
+4. Ensure module independence
+5. Update this README
 
-4. **Option 4: Use terraform.tfvars (locally, never commit)**
-   ```bash
-   # Create a local tfvars file (this file is ignored by .gitignore)
-   cat > local-secrets.tfvars <<EOF
-   sql_administrator_password = "YourSecurePassword"
-   EOF
-   
-   # Apply with multiple tfvars files
-   terraform apply \
-     -var-file="environments/dev/terraform.tfvars" \
-     -var-file="local-secrets.tfvars"
-   ```
+## 📄 Version History
 
-## 🔧 Customization
-
-### Adding a New Module
-
-1. Create module directory structure:
-   ```bash
-   mkdir -p modules/new-resource/{example}
-   ```
-
-2. Create the required files:
-   - `main.tf` - Resource definitions
-   - `variables.tf` - Input variables
-   - `outputs.tf` - Output values
-   - `provider.tf` - Provider configuration
-   - `example/terraform.tfvars` - Example usage
-
-3. Add module call to `main.tf`
-4. Add variables to `variables.tf`
-5. Add outputs to `outputs.tf`
-6. Update environment tfvars files
-
-### Modifying Existing Modules
-
-Each module is self-contained. Modify the module files directly and test using the example tfvars:
-
-```bash
-cd modules/resource-group
-terraform init
-terraform plan -var-file="example/terraform.tfvars"
-```
-
-## 📊 Terraform State Management
-
-This configuration uses Azure Storage as a remote backend for state management:
-
-- State files are stored per environment
-- State locking prevents concurrent modifications
-- Supports team collaboration
-- Enables state sharing across pipelines
-
-## 🧹 Cleanup
-
-To destroy resources:
-
-### Using Terraform CLI
-
-```bash
-terraform destroy -var-file="environments/dev/terraform.tfvars"
-```
-
-### Using GitHub Actions
-
-Trigger the workflow manually with the "destroy" option.
-
-## 📝 Contributing
-
-1. Create a feature branch
-2. Make your changes
-3. Test locally
-4. Create a pull request
-5. CI/CD will validate and plan changes
-6. Merge after approval
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🤝 Support
-
-For issues and questions:
-- Open an issue in GitHub
-- Contact the infrastructure team
+- **v2.0**: Major refactor with for_each pattern and module independence
+- **v1.0**: Initial release with basic modules
 
 ## 🔗 Resources
 
-- [Terraform Azure Provider Documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
-- [Azure Documentation](https://docs.microsoft.com/en-us/azure/)
-- [Terraform Best Practices](https://www.terraform.io/docs/cloud/guides/recommended-practices/index.html)
+- [Terraform Documentation](https://www.terraform.io/docs)
+- [Azure Provider Documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+- [Terraform for_each Meta-Argument](https://www.terraform.io/language/meta-arguments/for_each)
