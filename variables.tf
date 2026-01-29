@@ -118,9 +118,9 @@ variable "sql_servers" {
 variable "sql_databases" {
   description = "(Optional) Map of SQL databases to create. Each key is a unique identifier."
   type = map(object({
-    name          = string                # (Required) Database name
-    sql_server_id = string                # (Required) SQL Server ID
-    tags          = optional(map(string)) # (Optional) Additional tags
+    name      = string                # (Required) Database name
+    server_id = string                # (Required) SQL Server ID
+    tags      = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
 }
@@ -142,7 +142,7 @@ variable "container_registries" {
 variable "aks_clusters" {
   description = "(Optional) Map of AKS clusters to create. Each key is a unique identifier."
   type = map(object({
-    name                      = string                # (Required) AKS cluster name
+    cluster_name              = string                # (Required) AKS cluster name
     location                  = string                # (Required) Azure region
     resource_group_name       = string                # (Required) Resource group name
     dns_prefix                = string                # (Required) DNS prefix

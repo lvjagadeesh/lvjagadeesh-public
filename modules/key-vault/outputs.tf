@@ -2,20 +2,20 @@ output "key_vaults" {
   description = "Map of all key vaults created with their key attributes"
   value = {
     for k, kv in azurerm_key_vault.this : k => {
-      id                                  = kv.id
-      name                                = kv.name
-      vault_uri                           = kv.vault_uri
-      tenant_id                           = kv.tenant_id
-      location                            = kv.location
-      resource_group_name                 = kv.resource_group_name
-      sku_name                            = kv.sku_name
-      soft_delete_retention_days          = kv.soft_delete_retention_days
-      purge_protection_enabled            = kv.purge_protection_enabled
-      enabled_for_deployment              = kv.enabled_for_deployment
-      enabled_for_disk_encryption         = kv.enabled_for_disk_encryption
-      enabled_for_template_deployment     = kv.enabled_for_template_deployment
-      rbac_authorization_enabled          = kv.rbac_authorization_enabled
-      public_network_access_enabled       = kv.public_network_access_enabled
+      id                              = kv.id
+      name                            = kv.name
+      vault_uri                       = kv.vault_uri
+      tenant_id                       = kv.tenant_id
+      location                        = kv.location
+      resource_group_name             = kv.resource_group_name
+      sku_name                        = kv.sku_name
+      soft_delete_retention_days      = kv.soft_delete_retention_days
+      purge_protection_enabled        = kv.purge_protection_enabled
+      enabled_for_deployment          = kv.enabled_for_deployment
+      enabled_for_disk_encryption     = kv.enabled_for_disk_encryption
+      enabled_for_template_deployment = kv.enabled_for_template_deployment
+      rbac_authorization_enabled      = kv.rbac_authorization_enabled
+      public_network_access_enabled   = kv.public_network_access_enabled
     }
   }
 }

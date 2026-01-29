@@ -1,23 +1,17 @@
 # Resource Group Outputs
 output "resource_groups" {
   description = "Map of all resource groups created"
-  value = {
-    for k, rg in module.resource_group : k => {
-      name     = rg.resource_group_name
-      id       = rg.resource_group_id
-      location = rg.location
-    }
-  }
+  value       = module.resource_group.resource_groups
 }
 
 # Virtual Network Outputs
 output "virtual_networks" {
   description = "Map of all virtual networks created"
   value = {
-    for k, vnet in module.virtual_network : k => {
-      id         = vnet.vnet_id
-      name       = vnet.vnet_name
-      subnet_ids = vnet.subnet_ids
+    for k, vnet_id in module.virtual_network.vnet_ids : k => {
+      id         = vnet_id
+      name       = module.virtual_network.vnet_names[k]
+      subnet_ids = try(module.virtual_network.subnets_by_vnet[k], {})
     }
   }
 }
@@ -25,23 +19,17 @@ output "virtual_networks" {
 # Storage Account Outputs
 output "storage_accounts" {
   description = "Map of all storage accounts created"
-  value = {
-    for k, sa in module.storage_account : k => {
-      id                    = sa.storage_account_id
-      name                  = sa.storage_account_name
-      primary_blob_endpoint = sa.primary_blob_endpoint
-    }
-  }
+  value       = module.storage_account.storage_accounts
 }
 
 # Key Vault Outputs
 output "key_vaults" {
   description = "Map of all key vaults created"
   value = {
-    for k, kv in module.key_vault : k => {
-      id   = kv.key_vault_id
-      name = kv.key_vault_name
-      uri  = kv.key_vault_uri
+    for k, kv_id in module.key_vault.key_vault_ids : k => {
+      id   = kv_id
+      name = module.key_vault.key_vault_names[k]
+      uri  = module.key_vault.key_vault_uris[k]
     }
   }
 }
@@ -49,22 +37,17 @@ output "key_vaults" {
 # App Service Plan Outputs
 output "app_service_plans" {
   description = "Map of all app service plans created"
-  value = {
-    for k, asp in module.app_service_plan : k => {
-      id   = asp.app_service_plan_id
-      name = asp.app_service_plan_name
-    }
-  }
+  value       = module.app_service_plan.app_service_plans
 }
 
 # App Service Outputs
 output "app_services" {
   description = "Map of all app services created"
   value = {
-    for k, as in module.app_service : k => {
-      id               = as.app_service_id
-      name             = as.app_service_name
-      default_hostname = as.default_hostname
+    for k, as_id in module.app_service.app_service_ids : k => {
+      id               = as_id
+      name             = module.app_service.app_service_names[k]
+      default_hostname = module.app_service.default_hostnames[k]
     }
   }
 }
@@ -73,10 +56,10 @@ output "app_services" {
 output "sql_servers" {
   description = "Map of all SQL servers created"
   value = {
-    for k, sql in module.sql_server : k => {
-      id   = sql.sql_server_id
-      name = sql.sql_server_name
-      fqdn = sql.sql_server_fqdn
+    for k, sql_id in module.sql_server.sql_server_ids : k => {
+      id   = sql_id
+      name = module.sql_server.sql_server_names[k]
+      fqdn = module.sql_server.sql_server_fqdns[k]
     }
   }
 }
@@ -85,9 +68,9 @@ output "sql_servers" {
 output "sql_databases" {
   description = "Map of all SQL databases created"
   value = {
-    for k, db in module.sql_database : k => {
-      id   = db.database_id
-      name = db.database_name
+    for k, db_id in module.sql_database.database_ids : k => {
+      id   = db_id
+      name = module.sql_database.database_names[k]
     }
   }
 }
@@ -96,10 +79,10 @@ output "sql_databases" {
 output "container_registries" {
   description = "Map of all container registries created"
   value = {
-    for k, acr in module.container_registry : k => {
-      id           = acr.container_registry_id
-      name         = acr.container_registry_name
-      login_server = acr.login_server
+    for k, acr_id in module.container_registry.container_registry_ids : k => {
+      id           = acr_id
+      name         = module.container_registry.container_registry_names[k]
+      login_server = module.container_registry.login_servers[k]
     }
   }
 }
@@ -108,10 +91,10 @@ output "container_registries" {
 output "aks_clusters" {
   description = "Map of all AKS clusters created"
   value = {
-    for k, aks in module.aks_cluster : k => {
-      id   = aks.cluster_id
-      name = aks.cluster_name
-      fqdn = aks.cluster_fqdn
+    for k, cluster_id in module.aks_cluster.cluster_ids : k => {
+      id   = cluster_id
+      name = module.aks_cluster.cluster_names[k]
+      fqdn = module.aks_cluster.fqdns[k]
     }
   }
 }

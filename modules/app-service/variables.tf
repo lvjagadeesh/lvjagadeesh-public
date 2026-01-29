@@ -30,10 +30,10 @@ variable "app_services" {
     # ========================================
     # SITE_CONFIG ATTRIBUTES
     # ========================================
-    always_on                                     = optional(bool, true)
-    api_definition_url                            = optional(string)
-    api_management_api_id                         = optional(string)
-    app_command_line                              = optional(string)
+    always_on             = optional(bool, true)
+    api_definition_url    = optional(string)
+    api_management_api_id = optional(string)
+    app_command_line      = optional(string)
     auto_heal_setting = optional(object({
       action = object({
         action_type                    = string
@@ -86,7 +86,7 @@ variable "app_services" {
         x_forwarded_host  = optional(list(string))
       }))
     })), [])
-    ip_restriction_default_action = optional(string, "Allow") # Possible values: 'Allow', 'Deny'
+    ip_restriction_default_action = optional(string, "Allow")         # Possible values: 'Allow', 'Deny'
     load_balancing_mode           = optional(string, "LeastRequests") # Possible values: 'LeastRequests', 'WeightedRoundRobin', 'LeastResponseTime', 'WeightedTotalTraffic', 'RequestHash', 'PerSiteRoundRobin'
     local_mysql_enabled           = optional(bool, false)
     managed_pipeline_mode         = optional(string, "Integrated") # Possible values: 'Integrated', 'Classic'
@@ -118,7 +118,7 @@ variable "app_services" {
     # ========================================
     # APPLICATION_STACK ATTRIBUTES
     # ========================================
-    docker_image_name        = optional(string)                         # (Optional) Docker image name (e.g., nginx:latest)
+    docker_image_name        = optional(string) # (Optional) Docker image name (e.g., nginx:latest)
     docker_registry_url      = optional(string, "https://index.docker.io")
     docker_registry_username = optional(string)
     docker_registry_password = optional(string)

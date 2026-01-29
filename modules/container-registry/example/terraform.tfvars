@@ -17,11 +17,11 @@ container_registries = {
 
   # Standard container registry with network rules
   "staging_registry" = {
-    name                = "stagingacr12345"
-    resource_group_name = "example-rg"
-    location            = "East US"
-    sku                 = "Standard"
-    admin_enabled       = false
+    name                          = "stagingacr12345"
+    resource_group_name           = "example-rg"
+    location                      = "East US"
+    sku                           = "Standard"
+    admin_enabled                 = false
     public_network_access_enabled = false
     network_rule_bypass_option    = "AzureServices"
     network_rule_set = {

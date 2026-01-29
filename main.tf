@@ -33,49 +33,30 @@ provider "azurerm" {
 
 # Resource Group Module - Independent, can create multiple resource groups
 module "resource_group" {
-  source   = "./modules/resource-group"
-  for_each = var.resource_groups
+  source = "./modules/resource-group"
 
-  resource_group_name = each.value.name
-  location            = each.value.location
-  tags                = merge(var.common_tags, lookup(each.value, "tags", {}))
+  resource_groups = var.resource_groups
 }
 
 # Virtual Network Module - Independent, requires resource_group_name as input
 module "virtual_network" {
-  source   = "./modules/virtual-network"
-  for_each = var.virtual_networks
+  source = "./modules/virtual-network"
 
-  vnet_name           = each.value.name
-  address_space       = each.value.address_space
-  location            = each.value.location
-  resource_group_name = each.value.resource_group_name
-  subnets             = lookup(each.value, "subnets", [])
-  tags                = merge(var.common_tags, lookup(each.value, "tags", {}))
+  virtual_networks = var.virtual_networks
 }
 
 # Storage Account Module - Independent
 module "storage_account" {
-  source   = "./modules/storage-account"
-  for_each = var.storage_accounts
+  source = "./modules/storage-account"
 
-  storage_account_name     = each.value.name
-  resource_group_name      = each.value.resource_group_name
-  location                 = each.value.location
-  account_tier             = lookup(each.value, "account_tier", "Standard")
-  account_replication_type = lookup(each.value, "account_replication_type", "LRS")
-  tags                     = merge(var.common_tags, lookup(each.value, "tags", {}))
+  storage_accounts = var.storage_accounts
 }
 
 # Key Vault Module - Independent
 module "key_vault" {
-  source   = "./modules/key-vault"
-  for_each = var.key_vaults
+  source = "./modules/key-vault"
 
-  key_vault_name      = each.value.name
-  location            = each.value.location
-  resource_group_name = each.value.resource_group_name
-  tags                = merge(var.common_tags, lookup(each.value, "tags", {}))
+  key_vaults = var.key_vaults
 }
 
 # App Service Plan Module - Independent
@@ -87,62 +68,35 @@ module "app_service_plan" {
 
 # App Service Module - Independent, requires service_plan_id as input
 module "app_service" {
-  source   = "./modules/app-service"
-  for_each = var.app_services
+  source = "./modules/app-service"
 
-  app_service_name    = each.value.name
-  location            = each.value.location
-  resource_group_name = each.value.resource_group_name
-  service_plan_id     = each.value.service_plan_id
-  tags                = merge(var.common_tags, lookup(each.value, "tags", {}))
+  app_services = var.app_services
 }
 
 # SQL Server Module - Independent
 module "sql_server" {
-  source   = "./modules/sql-server"
-  for_each = var.sql_servers
+  source = "./modules/sql-server"
 
-  sql_server_name              = each.value.name
-  resource_group_name          = each.value.resource_group_name
-  location                     = each.value.location
-  administrator_login          = each.value.administrator_login
-  administrator_login_password = each.value.administrator_login_password
-  tags                         = merge(var.common_tags, lookup(each.value, "tags", {}))
+  sql_servers = var.sql_servers
 }
 
 # SQL Database Module - Independent, requires sql_server_id as input
 module "sql_database" {
-  source   = "./modules/sql-database"
-  for_each = var.sql_databases
+  source = "./modules/sql-database"
 
-  database_name = each.value.name
-  sql_server_id = each.value.sql_server_id
-  tags          = merge(var.common_tags, lookup(each.value, "tags", {}))
+  sql_databases = var.sql_databases
 }
 
 # Container Registry Module - Independent
 module "container_registry" {
-  source   = "./modules/container-registry"
-  for_each = var.container_registries
+  source = "./modules/container-registry"
 
-  container_registry_name = each.value.name
-  resource_group_name     = each.value.resource_group_name
-  location                = each.value.location
-  sku                     = lookup(each.value, "sku", "Standard")
-  tags                    = merge(var.common_tags, lookup(each.value, "tags", {}))
+  container_registries = var.container_registries
 }
 
 # AKS Cluster Module - Independent
 module "aks_cluster" {
-  source   = "./modules/aks-cluster"
-  for_each = var.aks_clusters
+  source = "./modules/aks-cluster"
 
-  cluster_name              = each.value.name
-  location                  = each.value.location
-  resource_group_name       = each.value.resource_group_name
-  dns_prefix                = each.value.dns_prefix
-  kubernetes_version        = lookup(each.value, "kubernetes_version", "1.27.0")
-  default_node_pool_vm_size = lookup(each.value, "default_node_pool_vm_size", "Standard_D2_v2")
-  default_node_pool_count   = lookup(each.value, "default_node_pool_count", 3)
-  tags                      = merge(var.common_tags, lookup(each.value, "tags", {}))
+  aks_clusters = var.aks_clusters
 }
