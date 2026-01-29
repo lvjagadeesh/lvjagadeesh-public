@@ -1,20 +1,35 @@
-output "storage_account_id" {
-  description = "The ID of the storage account"
-  value       = azurerm_storage_account.this.id
+output "storage_accounts" {
+  description = "Map of all storage accounts created"
+  value = {
+    for k, sa in azurerm_storage_account.this : k => {
+      id                    = sa.id
+      name                  = sa.name
+      primary_blob_endpoint = sa.primary_blob_endpoint
+      primary_access_key    = sa.primary_access_key
+      resource_group_name   = sa.resource_group_name
+      location              = sa.location
+    }
+  }
+  sensitive = true
 }
 
-output "storage_account_name" {
-  description = "The name of the storage account"
-  value       = azurerm_storage_account.this.name
+output "storage_account_ids" {
+  description = "Map of storage account keys to IDs"
+  value       = { for k, sa in azurerm_storage_account.this : k => sa.id }
 }
 
-output "primary_blob_endpoint" {
-  description = "The primary blob endpoint"
-  value       = azurerm_storage_account.this.primary_blob_endpoint
+output "storage_account_names" {
+  description = "Map of storage account keys to names"
+  value       = { for k, sa in azurerm_storage_account.this : k => sa.name }
 }
 
-output "primary_access_key" {
-  description = "The primary access key"
-  value       = azurerm_storage_account.this.primary_access_key
+output "primary_blob_endpoints" {
+  description = "Map of storage account keys to primary blob endpoints"
+  value       = { for k, sa in azurerm_storage_account.this : k => sa.primary_blob_endpoint }
+}
+
+output "primary_access_keys" {
+  description = "Map of storage account keys to primary access keys"
+  value       = { for k, sa in azurerm_storage_account.this : k => sa.primary_access_key }
   sensitive   = true
 }

@@ -1,33 +1,35 @@
 resource "azurerm_storage_account" "this" {
-  name                              = var.storage_account_name
-  resource_group_name               = var.resource_group_name
-  location                          = var.location
-  account_tier                      = var.account_tier
-  account_replication_type          = var.account_replication_type
-  account_kind                      = var.account_kind
-  access_tier                       = var.access_tier
-  cross_tenant_replication_enabled  = var.cross_tenant_replication_enabled
-  edge_zone                         = var.edge_zone
-  https_traffic_only_enabled        = var.enable_https_traffic_only
-  min_tls_version                   = var.min_tls_version
-  allow_nested_items_to_be_public   = var.allow_nested_items_to_be_public
-  shared_access_key_enabled         = var.shared_access_key_enabled
-  public_network_access_enabled     = var.public_network_access_enabled
-  default_to_oauth_authentication   = var.default_to_oauth_authentication
-  is_hns_enabled                    = var.is_hns_enabled
-  nfsv3_enabled                     = var.nfsv3_enabled
-  large_file_share_enabled          = var.large_file_share_enabled
-  local_user_enabled                = var.local_user_enabled
-  queue_encryption_key_type         = var.queue_encryption_key_type
-  table_encryption_key_type         = var.table_encryption_key_type
-  infrastructure_encryption_enabled = var.infrastructure_encryption_enabled
-  sftp_enabled                      = var.sftp_enabled
-  dns_endpoint_type                 = var.dns_endpoint_type
-  allowed_copy_scope                = var.allowed_copy_scope
-  tags                              = var.tags
+  for_each = var.storage_accounts
+
+  name                              = each.value.name
+  resource_group_name               = each.value.resource_group_name
+  location                          = each.value.location
+  account_tier                      = each.value.account_tier
+  account_replication_type          = each.value.account_replication_type
+  account_kind                      = each.value.account_kind
+  access_tier                       = each.value.access_tier
+  cross_tenant_replication_enabled  = each.value.cross_tenant_replication_enabled
+  edge_zone                         = each.value.edge_zone
+  https_traffic_only_enabled        = each.value.enable_https_traffic_only
+  min_tls_version                   = each.value.min_tls_version
+  allow_nested_items_to_be_public   = each.value.allow_nested_items_to_be_public
+  shared_access_key_enabled         = each.value.shared_access_key_enabled
+  public_network_access_enabled     = each.value.public_network_access_enabled
+  default_to_oauth_authentication   = each.value.default_to_oauth_authentication
+  is_hns_enabled                    = each.value.is_hns_enabled
+  nfsv3_enabled                     = each.value.nfsv3_enabled
+  large_file_share_enabled          = each.value.large_file_share_enabled
+  local_user_enabled                = each.value.local_user_enabled
+  queue_encryption_key_type         = each.value.queue_encryption_key_type
+  table_encryption_key_type         = each.value.table_encryption_key_type
+  infrastructure_encryption_enabled = each.value.infrastructure_encryption_enabled
+  sftp_enabled                      = each.value.sftp_enabled
+  dns_endpoint_type                 = each.value.dns_endpoint_type
+  allowed_copy_scope                = each.value.allowed_copy_scope
+  tags                              = each.value.tags
 
   dynamic "blob_properties" {
-    for_each = var.blob_properties != null ? [var.blob_properties] : []
+    for_each = each.value.blob_properties != null ? [each.value.blob_properties] : []
     content {
       versioning_enabled            = try(blob_properties.value.versioning_enabled, null)
       change_feed_enabled           = try(blob_properties.value.change_feed_enabled, null)
@@ -71,7 +73,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "queue_properties" {
-    for_each = var.queue_properties != null ? [var.queue_properties] : []
+    for_each = each.value.queue_properties != null ? [each.value.queue_properties] : []
     content {
       dynamic "cors_rule" {
         for_each = try(queue_properties.value.cors_rule, [])
@@ -118,7 +120,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "static_website" {
-    for_each = var.static_website != null ? [var.static_website] : []
+    for_each = each.value.static_website != null ? [each.value.static_website] : []
     content {
       index_document     = try(static_website.value.index_document, null)
       error_404_document = try(static_website.value.error_404_document, null)
@@ -126,7 +128,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "share_properties" {
-    for_each = var.share_properties != null ? [var.share_properties] : []
+    for_each = each.value.share_properties != null ? [each.value.share_properties] : []
     content {
       dynamic "cors_rule" {
         for_each = try(share_properties.value.cors_rule, [])
@@ -160,7 +162,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "network_rules" {
-    for_each = var.network_rules != null ? [var.network_rules] : []
+    for_each = each.value.network_rules != null ? [each.value.network_rules] : []
     content {
       default_action             = network_rules.value.default_action
       bypass                     = try(network_rules.value.bypass, ["AzureServices"])
@@ -178,7 +180,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "azure_files_authentication" {
-    for_each = var.azure_files_authentication != null ? [var.azure_files_authentication] : []
+    for_each = each.value.azure_files_authentication != null ? [each.value.azure_files_authentication] : []
     content {
       directory_type = azure_files_authentication.value.directory_type
 
@@ -199,7 +201,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "routing" {
-    for_each = var.routing != null ? [var.routing] : []
+    for_each = each.value.routing != null ? [each.value.routing] : []
     content {
       publish_internet_endpoints  = try(routing.value.publish_internet_endpoints, null)
       publish_microsoft_endpoints = try(routing.value.publish_microsoft_endpoints, null)
@@ -208,7 +210,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "identity" {
-    for_each = var.identity != null ? [var.identity] : []
+    for_each = each.value.identity != null ? [each.value.identity] : []
     content {
       type         = identity.value.type
       identity_ids = try(identity.value.identity_ids, null)
@@ -216,7 +218,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "customer_managed_key" {
-    for_each = var.customer_managed_key != null ? [var.customer_managed_key] : []
+    for_each = each.value.customer_managed_key != null ? [each.value.customer_managed_key] : []
     content {
       key_vault_key_id          = customer_managed_key.value.key_vault_key_id
       user_assigned_identity_id = try(customer_managed_key.value.user_assigned_identity_id, null)
@@ -225,7 +227,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "sas_policy" {
-    for_each = var.sas_policy != null ? [var.sas_policy] : []
+    for_each = each.value.sas_policy != null ? [each.value.sas_policy] : []
     content {
       expiration_period = sas_policy.value.expiration_period
       expiration_action = try(sas_policy.value.expiration_action, "Log")
@@ -233,7 +235,7 @@ resource "azurerm_storage_account" "this" {
   }
 
   dynamic "immutability_policy" {
-    for_each = var.immutability_policy != null ? [var.immutability_policy] : []
+    for_each = each.value.immutability_policy != null ? [each.value.immutability_policy] : []
     content {
       allow_protected_append_writes = immutability_policy.value.allow_protected_append_writes
       state                         = immutability_policy.value.state
