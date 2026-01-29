@@ -47,28 +47,131 @@ variable "admin_enabled" {
   nullable    = false
 }
 
+variable "public_network_access_enabled" {
+  description = "(Optional) Whether public network access is allowed for the container registry. Default: true"
+  type        = bool
+  default     = true
+  nullable    = false
+}
+
+variable "quarantine_policy_enabled" {
+  description = "(Optional) Boolean value that indicates whether quarantine policy is enabled. Requires Premium SKU. Default: false"
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
+variable "zone_redundancy_enabled" {
+  description = "(Optional) Whether zone redundancy is enabled for this Container Registry. Requires Premium SKU and can only be set at creation. Default: false"
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
+variable "export_policy_enabled" {
+  description = "(Optional) Boolean value that indicates whether export policy is enabled. Default: true"
+  type        = bool
+  default     = true
+  nullable    = false
+}
+
+variable "anonymous_pull_enabled" {
+  description = "(Optional) Whether anonymous pull access is allowed. Default: false"
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
+variable "data_endpoint_enabled" {
+  description = "(Optional) Whether to enable dedicated data endpoints for this Container Registry. Requires Premium SKU. Default: false"
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
+variable "network_rule_bypass_option" {
+  description = "(Optional) Whether to allow trusted Azure services to access a network restricted Container Registry. Possible values: AzureServices, None. Default: AzureServices"
+  type        = string
+  default     = "AzureServices"
+  nullable    = false
+
+  validation {
+    condition     = contains(["AzureServices", "None"], var.network_rule_bypass_option)
+    error_message = "Network rule bypass option must be either AzureServices or None."
+  }
+}
+
 variable "georeplications" {
   description = "(Optional) Geo-replications for the registry. Requires Premium SKU. Default: []"
   type = list(object({
-    location                = string      # (Required) Azure region for replication
-    zone_redundancy_enabled = bool        # (Required) Enable zone redundancy
-    tags                    = map(string) # (Optional) Tags for this replication
+    location                  = string                # (Required) Azure region for replication
+    zone_redundancy_enabled   = optional(bool)        # (Optional) Enable zone redundancy
+    regional_endpoint_enabled = optional(bool)        # (Optional) Enable regional endpoint
+    tags                      = optional(map(string)) # (Optional) Tags for this replication
   }))
   default  = []
   nullable = false
   # Note: Geo-replication requires Premium SKU
 }
 
-variable "network_rule_default_action" {
-  description = "(Optional) Default action for network rules. Valid values: Allow, Deny. Default: Deny"
-  type        = string
-  default     = "Deny"
-  nullable    = false
+variable "network_rule_set" {
+  description = "(Optional) Network rule set configuration for the Container Registry"
+  type = object({
+    default_action = optional(string) # (Optional) Default action for network rules. Valid values: Allow, Deny
+    ip_rule = optional(list(object({
+      action   = string # (Required) Action for the IP rule. Must be Allow
+      ip_range = string # (Required) IP address or CIDR range
+    })))
+  })
+  default  = null
+  nullable = true
+}
+
+variable "retention_policy_in_days" {
+  description = "(Optional) Number of days to retain an untagged manifest after which it gets purged. Requires Premium SKU. Value between 0 and 365"
+  type        = number
+  default     = null
+  nullable    = true
 
   validation {
-    condition     = contains(["Allow", "Deny"], var.network_rule_default_action)
-    error_message = "Network rule default action must be either Allow or Deny."
+    condition     = var.retention_policy_in_days == null || (var.retention_policy_in_days >= 0 && var.retention_policy_in_days <= 365)
+    error_message = "Retention policy must be between 0 and 365 days."
   }
+}
+
+variable "trust_policy_enabled" {
+  description = "(Optional) Boolean value that indicates whether the trust policy is enabled. Requires Premium SKU. Default: null"
+  type        = bool
+  default     = null
+  nullable    = true
+}
+
+variable "identity" {
+  description = "(Optional) Managed identity configuration for the Container Registry"
+  type = object({
+    type         = string                 # (Required) Type of identity. Possible values: SystemAssigned, UserAssigned, SystemAssigned, UserAssigned
+    identity_ids = optional(list(string)) # (Optional) List of User Assigned Identity IDs
+  })
+  default  = null
+  nullable = true
+
+  validation {
+    condition = var.identity == null || contains(
+      ["SystemAssigned", "UserAssigned", "SystemAssigned, UserAssigned"],
+      var.identity.type
+    )
+    error_message = "Identity type must be one of: SystemAssigned, UserAssigned, SystemAssigned, UserAssigned."
+  }
+}
+
+variable "encryption" {
+  description = "(Optional) Encryption configuration using customer-managed key. Requires Premium SKU"
+  type = object({
+    key_vault_key_id   = string # (Required) Key Vault Key ID for encryption
+    identity_client_id = string # (Required) Client ID of the managed identity
+  })
+  default  = null
+  nullable = true
 }
 
 variable "tags" {
