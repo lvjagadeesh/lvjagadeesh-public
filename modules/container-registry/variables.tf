@@ -50,9 +50,9 @@ variable "admin_enabled" {
 variable "georeplications" {
   description = "(Optional) Geo-replications for the registry. Requires Premium SKU. Default: []"
   type = list(object({
-    location                = string       # (Required) Azure region for replication
-    zone_redundancy_enabled = bool         # (Required) Enable zone redundancy
-    tags                    = map(string)  # (Optional) Tags for this replication
+    location                = string      # (Required) Azure region for replication
+    zone_redundancy_enabled = bool        # (Required) Enable zone redundancy
+    tags                    = map(string) # (Optional) Tags for this replication
   }))
   default  = []
   nullable = false

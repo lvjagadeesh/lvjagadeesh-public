@@ -27,8 +27,8 @@ output "storage_accounts" {
   description = "Map of all storage accounts created"
   value = {
     for k, sa in module.storage_account : k => {
-      id                   = sa.storage_account_id
-      name                 = sa.storage_account_name
+      id                    = sa.storage_account_id
+      name                  = sa.storage_account_name
       primary_blob_endpoint = sa.primary_blob_endpoint
     }
   }

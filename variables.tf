@@ -11,8 +11,8 @@ variable "common_tags" {
 variable "resource_groups" {
   description = "(Optional) Map of resource groups to create. Each key is a unique identifier."
   type = map(object({
-    name     = string           # (Required) Name of the resource group
-    location = string           # (Required) Azure region
+    name     = string                # (Required) Name of the resource group
+    location = string                # (Required) Azure region
     tags     = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
@@ -22,11 +22,11 @@ variable "resource_groups" {
 variable "virtual_networks" {
   description = "(Optional) Map of virtual networks to create. Each key is a unique identifier."
   type = map(object({
-    name                = string           # (Required) Name of the virtual network
-    address_space       = list(string)     # (Required) Address space
-    location            = string           # (Required) Azure region
-    resource_group_name = string           # (Required) Resource group name
-    subnets = optional(list(object({      # (Optional) List of subnets
+    name                = string       # (Required) Name of the virtual network
+    address_space       = list(string) # (Required) Address space
+    location            = string       # (Required) Azure region
+    resource_group_name = string       # (Required) Resource group name
+    subnets = optional(list(object({   # (Optional) List of subnets
       name             = string
       address_prefixes = list(string)
     })), [])
@@ -39,11 +39,11 @@ variable "virtual_networks" {
 variable "storage_accounts" {
   description = "(Optional) Map of storage accounts to create. Each key is a unique identifier."
   type = map(object({
-    name                     = string           # (Required) Storage account name
-    resource_group_name      = string           # (Required) Resource group name
-    location                 = string           # (Required) Azure region
-    account_tier             = optional(string) # (Optional) Account tier, default: Standard
-    account_replication_type = optional(string) # (Optional) Replication type, default: LRS
+    name                     = string                # (Required) Storage account name
+    resource_group_name      = string                # (Required) Resource group name
+    location                 = string                # (Required) Azure region
+    account_tier             = optional(string)      # (Optional) Account tier, default: Standard
+    account_replication_type = optional(string)      # (Optional) Replication type, default: LRS
     tags                     = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
@@ -53,9 +53,9 @@ variable "storage_accounts" {
 variable "key_vaults" {
   description = "(Optional) Map of key vaults to create. Each key is a unique identifier."
   type = map(object({
-    name                = string           # (Required) Key Vault name
-    location            = string           # (Required) Azure region
-    resource_group_name = string           # (Required) Resource group name
+    name                = string                # (Required) Key Vault name
+    location            = string                # (Required) Azure region
+    resource_group_name = string                # (Required) Resource group name
     tags                = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
@@ -65,11 +65,11 @@ variable "key_vaults" {
 variable "app_service_plans" {
   description = "(Optional) Map of app service plans to create. Each key is a unique identifier."
   type = map(object({
-    name                = string           # (Required) App Service Plan name
-    location            = string           # (Required) Azure region
-    resource_group_name = string           # (Required) Resource group name
-    os_type             = optional(string) # (Optional) OS type, default: Linux
-    sku_name            = optional(string) # (Optional) SKU name, default: P1v2
+    name                = string                # (Required) App Service Plan name
+    location            = string                # (Required) Azure region
+    resource_group_name = string                # (Required) Resource group name
+    os_type             = optional(string)      # (Optional) OS type, default: Linux
+    sku_name            = optional(string)      # (Optional) SKU name, default: P1v2
     tags                = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
@@ -79,10 +79,10 @@ variable "app_service_plans" {
 variable "app_services" {
   description = "(Optional) Map of app services to create. Each key is a unique identifier."
   type = map(object({
-    name                = string           # (Required) App Service name
-    location            = string           # (Required) Azure region
-    resource_group_name = string           # (Required) Resource group name
-    service_plan_id     = string           # (Required) Service Plan ID
+    name                = string                # (Required) App Service name
+    location            = string                # (Required) Azure region
+    resource_group_name = string                # (Required) Resource group name
+    service_plan_id     = string                # (Required) Service Plan ID
     tags                = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
@@ -92,23 +92,23 @@ variable "app_services" {
 variable "sql_servers" {
   description = "(Optional) Map of SQL servers to create. Each key is a unique identifier."
   type = map(object({
-    name                         = string           # (Required) SQL Server name
-    resource_group_name          = string           # (Required) Resource group name
-    location                     = string           # (Required) Azure region
-    administrator_login          = string           # (Required) Admin login
-    administrator_login_password = string           # (Required) Admin password
+    name                         = string                # (Required) SQL Server name
+    resource_group_name          = string                # (Required) Resource group name
+    location                     = string                # (Required) Azure region
+    administrator_login          = string                # (Required) Admin login
+    administrator_login_password = string                # (Required) Admin password
     tags                         = optional(map(string)) # (Optional) Additional tags
   }))
-  default   = {}
-  sensitive = true
+  default = {}
+  # Note: Passwords should be managed securely via environment variables or external systems
 }
 
 # SQL Database Variables - for_each map
 variable "sql_databases" {
   description = "(Optional) Map of SQL databases to create. Each key is a unique identifier."
   type = map(object({
-    name          = string           # (Required) Database name
-    sql_server_id = string           # (Required) SQL Server ID
+    name          = string                # (Required) Database name
+    sql_server_id = string                # (Required) SQL Server ID
     tags          = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
@@ -118,10 +118,10 @@ variable "sql_databases" {
 variable "container_registries" {
   description = "(Optional) Map of container registries to create. Each key is a unique identifier."
   type = map(object({
-    name                = string           # (Required) Container Registry name
-    resource_group_name = string           # (Required) Resource group name
-    location            = string           # (Required) Azure region
-    sku                 = optional(string) # (Optional) SKU, default: Standard
+    name                = string                # (Required) Container Registry name
+    resource_group_name = string                # (Required) Resource group name
+    location            = string                # (Required) Azure region
+    sku                 = optional(string)      # (Optional) SKU, default: Standard
     tags                = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
@@ -131,13 +131,13 @@ variable "container_registries" {
 variable "aks_clusters" {
   description = "(Optional) Map of AKS clusters to create. Each key is a unique identifier."
   type = map(object({
-    name                      = string           # (Required) AKS cluster name
-    location                  = string           # (Required) Azure region
-    resource_group_name       = string           # (Required) Resource group name
-    dns_prefix                = string           # (Required) DNS prefix
-    kubernetes_version        = optional(string) # (Optional) K8s version, default: 1.27.0
-    default_node_pool_vm_size = optional(string) # (Optional) VM size, default: Standard_D2_v2
-    default_node_pool_count   = optional(number) # (Optional) Node count, default: 3
+    name                      = string                # (Required) AKS cluster name
+    location                  = string                # (Required) Azure region
+    resource_group_name       = string                # (Required) Resource group name
+    dns_prefix                = string                # (Required) DNS prefix
+    kubernetes_version        = optional(string)      # (Optional) K8s version, default: 1.27.0
+    default_node_pool_vm_size = optional(string)      # (Optional) VM size, default: Standard_D2_v2
+    default_node_pool_count   = optional(number)      # (Optional) Node count, default: 3
     tags                      = optional(map(string)) # (Optional) Additional tags
   }))
   default = {}
