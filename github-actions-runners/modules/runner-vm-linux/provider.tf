@@ -1,0 +1,15 @@
+/**
+ * GitHub Actions Runner - Linux VM Module
+ * Provider Configuration
+ */
+
+terraform {
+  required_version = ">= 1.14.0"
+
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.58"
+    }
+  }
+}
