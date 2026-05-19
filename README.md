@@ -29,6 +29,7 @@ This repository contains **10 independent Azure Terraform modules** that can be 
 ### Key Features
 
 - ✅ **Latest Versions**: Terraform 1.14.0+ and AzureRM Provider 4.58+
+- ✅ **Language**: Terraform configuration language (HCL)
 - ✅ **Independent Modules**: No cross-module dependencies
 - ✅ **for_each Pattern**: Create multiple instances of any resource
 - ✅ **Required/Optional Variables**: Clearly marked with validation
