@@ -2,6 +2,10 @@
 
 Production-ready Azure Terraform infrastructure with fully independent modules, for_each pattern support, and latest provider versions.
 
+## ❓ What this repository is used for
+
+This repository is used to **define and deploy Azure infrastructure using Terraform**. It provides reusable modules for core Azure services (networking, storage, Key Vault, App Service, SQL, ACR, AKS), plus root-level configuration and environment-specific `tfvars` to deploy consistent infrastructure across development, staging, and production.
+
 ## 📦 Quick Module Reference
 
 **10 Production-Ready Modules Available**:
